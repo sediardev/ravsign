@@ -62,7 +62,7 @@ class DocumentSeeder extends Seeder
                     'email' => $email,
                     'color' => $color,
                     'position' => $position,
-                    'token' => $status === DocumentStatus::Borrador ? null : Str::random(64),
+                    'token' => $status === DocumentStatus::Borrador ? null : (string) Str::uuid(),
                     'signed_at' => $status === DocumentStatus::Completado ? $date : null,
                 ]);
             }

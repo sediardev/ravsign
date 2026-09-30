@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Trash2 } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -9,9 +10,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { FIELD_HEIGHT_RANGE, FIELD_WIDTH_RANGE } from '@/lib/documents';
 import type { SignField, Signer } from '@/types';
 
-defineProps<{
+const props = defineProps<{
     field: SignField;
     signers: Signer[];
     /** One-row layout for the mobile bottom bar. */
@@ -20,8 +22,28 @@ defineProps<{
 
 const emit = defineEmits<{
     reassign: [signerId: unknown];
+    resize: [size: { width: number; height: number }];
     remove: [];
 }>();
+
+function clamp(value: number, range: { min: number; max: number }): number {
+    return Math.min(range.max, Math.max(range.min, value));
+}
+
+function onResize(dimension: 'width' | 'height', event: Event): void {
+    const raw = Number((event.target as HTMLInputElement).value);
+
+    if (!Number.isFinite(raw)) {
+        return;
+    }
+
+    const range = dimension === 'width' ? FIELD_WIDTH_RANGE : FIELD_HEIGHT_RANGE;
+
+    emit('resize', {
+        width: dimension === 'width' ? clamp(raw, range) : props.field.width,
+        height: dimension === 'height' ? clamp(raw, range) : props.field.height,
+    });
+}
 </script>
 
 <template>
@@ -99,6 +121,35 @@ const emit = defineEmits<{
                     </SelectItem>
                 </SelectContent>
             </Select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+                <Label for="field-width">Ancho (pt)</Label>
+                <Input
+                    id="field-width"
+                    type="number"
+                    class="h-10 bg-white"
+                    :min="FIELD_WIDTH_RANGE.min"
+                    :max="FIELD_WIDTH_RANGE.max"
+                    :model-value="field.width"
+                    data-test="field-width"
+                    @change="onResize('width', $event)"
+                />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="field-height">Alto (pt)</Label>
+                <Input
+                    id="field-height"
+                    type="number"
+                    class="h-10 bg-white"
+                    :min="FIELD_HEIGHT_RANGE.min"
+                    :max="FIELD_HEIGHT_RANGE.max"
+                    :model-value="field.height"
+                    data-test="field-height"
+                    @change="onResize('height', $event)"
+                />
+            </div>
         </div>
 
         <Button

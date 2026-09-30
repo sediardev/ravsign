@@ -10,7 +10,7 @@ export const GRID = 8;
 /** Signer colors, in the order they are assigned. */
 export const SIGNER_COLORS = ['#1792bb', '#7a4fc9', '#d27a1f', '#2f9e6b'];
 
-/** Field size in PDF points. */
+/** Default field size in PDF points, used when a new field is placed. */
 export const FIELD_SIZES: Record<FieldType, { width: number; height: number }> =
     {
         firma: { width: 176, height: 58 },
@@ -18,6 +18,40 @@ export const FIELD_SIZES: Record<FieldType, { width: number; height: number }> =
         fecha: { width: 132, height: 36 },
         nombre: { width: 176, height: 36 },
     };
+
+/** Bounds for editing a field's width and height, in PDF points. Match the server. */
+export const FIELD_WIDTH_RANGE = { min: 24, max: 400 };
+export const FIELD_HEIGHT_RANGE = { min: 16, max: 200 };
+
+/**
+ * Clamp a field's width and height to the editable bounds and to the space
+ * left on the page from its top-left corner, so it never resizes off the edge.
+ */
+export function clampFieldSize(input: {
+    width: number;
+    height: number;
+    /** The field's stored position, as a percentage of the page (0-100). */
+    x: number;
+    y: number;
+    pageWidth: number;
+    pageHeight: number;
+}): { width: number; height: number } {
+    const { width, height, x, y, pageWidth, pageHeight } = input;
+
+    const maxWidth = Math.min(
+        FIELD_WIDTH_RANGE.max,
+        pageWidth - (x / 100) * pageWidth,
+    );
+    const maxHeight = Math.min(
+        FIELD_HEIGHT_RANGE.max,
+        pageHeight - (y / 100) * pageHeight,
+    );
+
+    return {
+        width: Math.min(maxWidth, Math.max(FIELD_WIDTH_RANGE.min, width)),
+        height: Math.min(maxHeight, Math.max(FIELD_HEIGHT_RANGE.min, height)),
+    };
+}
 
 export const FIELD_LABELS: Record<FieldType, string> = {
     firma: 'Firma',
@@ -54,10 +88,9 @@ export function placeField(input: {
     grab: { x: number; y: number };
     pageRect: PageRect;
     zoom: number;
-    type: FieldType;
+    size: { width: number; height: number };
 }): Placement {
-    const { pointer, grab, pageRect, zoom, type } = input;
-    const size = FIELD_SIZES[type];
+    const { pointer, grab, pageRect, zoom, size } = input;
     const pageWidth = pageRect.width / zoom;
     const pageHeight = pageRect.height / zoom;
 

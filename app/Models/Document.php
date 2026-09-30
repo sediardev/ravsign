@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DocumentStatus;
+use App\Models\Concerns\HasUuid;
 use Database\Factories\DocumentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
+ * @property string $uuid
  * @property int $user_id
  * @property string $name
  * @property string $original_path
@@ -29,7 +31,7 @@ use Illuminate\Support\Facades\Storage;
 class Document extends Model
 {
     /** @use HasFactory<DocumentFactory> */
-    use HasFactory;
+    use HasFactory, HasUuid;
 
     protected static function booted(): void
     {

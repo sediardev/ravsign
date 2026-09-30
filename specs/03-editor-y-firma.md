@@ -17,9 +17,10 @@ Convenciones de coordenadas (iguales a las del artifact):
 
 - Tamaño base de página: 612 × 792 puntos (Letter). Para PDF subidos de otro tamaño, las posiciones en porcentaje siguen valiendo y el tamaño en pantalla se calcula con la proporción real de cada página.
 - Posición de un campo: `x` e `y` en porcentaje de la página, origen arriba a la izquierda, `page` base 0.
-- Tamaños de campo en puntos: firma 176 × 58, iniciales 92 × 58, fecha 132 × 36, nombre 176 × 36.
+- Tamaños de campo en puntos, por defecto al crear uno nuevo: firma 176 × 58, iniciales 92 × 58, fecha 132 × 36, nombre 176 × 36. El ancho y el alto se guardan por campo y se pueden editar después (ver "Ajuste de tamaño" más abajo), así que dos campos del mismo tipo pueden acabar con tamaños distintos.
 - Ajuste a rejilla de 8 puntos al soltar un campo.
 - En móvil la página se escala a `min(1, (ancho de ventana − 24) / 612)`.
+- En escritorio, un control de zoom flotante (alejar / porcentaje / acercar) en la esquina inferior derecha del editor permite acercar el documento entre 50 % y 250 % en pasos de 10 %, sobre el 100 % real; el porcentaje también restablece el zoom al pulsarlo. Sirve para ver y colocar un campo con más precisión.
 - Colores de firmantes en orden: `#1792bb`, `#7a4fc9`, `#d27a1f`, `#2f9e6b`.
 
 ---
@@ -51,6 +52,7 @@ Convenciones de coordenadas (iguales a las del artifact):
 - Panel de firmantes: lista, alta con nombre, correo y siglas (máximo 4, por defecto las iniciales del nombre), baja con "×" y selección del firmante activo. Alta y baja se guardan en la base de datos.
 - Paleta con el campo "Firma" que se arrastra al documento, con fantasma mientras se arrastra.
 - Mover campos ya colocados entre páginas, seleccionar, reasignar a otro firmante con un selector, eliminar con botón y con las teclas Suprimir o Retroceso. Cada cambio se guarda en el servidor.
+- Con un campo seleccionado, editar su ancho y su alto de dos formas: escribiendo el valor en puntos en dos campos numéricos ("Ancho (pt)", "Alto (pt)"), o arrastrando el asa circular de su esquina inferior derecha directamente sobre el documento. Ambas vías están acotadas entre 24-400 pt de ancho y 16-200 pt de alto, y sin salirse de la página. La firma estampada se ajusta ("contain") al nuevo tamaño sin deformarse, dejando espacio vacío si la proporción no coincide exactamente.
 - Resumen "N campos en el documento".
 - Variante móvil: firmantes en hoja inferior, paleta y selección en barra inferior.
 - Aviso "Agrega un firmante primero" y "Agrega al menos un campo al documento" cuando corresponda.
@@ -76,6 +78,11 @@ Convenciones de coordenadas (iguales a las del artifact):
 
 - Al completarse el documento se genera con FPDI el PDF firmado (estampa cada imagen de firma en la posición del campo) y se guarda en el disco local.
 - Descarga del PDF firmado desde el modal de enlaces de un documento completado (solo el dueño).
+
+*Identificadores*
+
+- `documents`, `signers` y `sign_fields` tienen, además del `id` incremental interno (solo para claves foráneas), una columna `uuid` única que es la que se expone: rutas (`/documents/{uuid}/editor`, etc.), respuestas JSON y props de Inertia. El `id` numérico nunca sale del servidor.
+- El enlace de firma de cada firmante usa su propio identificador (`token`), distinto del `uuid` del firmante: un UUID v4 (36 caracteres) generado con `Str::uuid()` al enviar el documento, más corto que el `Str::random(64)` de la versión anterior.
 
 *Otros*
 
@@ -110,7 +117,7 @@ export interface SignLink {
 }
 ```
 
-`DocumentItem` gana `pages: number` y `links: SignLink[]` (vacío en borrador). Los ids llegan como string en firmantes y campos (`'12'`) para mantener el tipo de SPEC 02.
+`DocumentItem` gana `pages: number` y `links: SignLink[]` (vacío en borrador). Todos los ids (`DocumentItem.id`, `Signer.id`, `SignField.id`, `SignLink.signerId`) son el `uuid` del recurso, como string. `SignField` gana `width: number` y `height: number` (puntos, editables).
 
 ### Migraciones
 
@@ -118,7 +125,8 @@ export interface SignLink {
 
 | Columna | Tipo | Notas |
 | --- | --- | --- |
-| `id` | bigint PK | |
+| `id` | bigint PK | interno, solo para claves foráneas |
+| `uuid` | uuid, unique | identificador público del documento; usado en rutas y respuestas |
 | `user_id` | FK `users`, cascade | dueño |
 | `name` | string | nombre original del archivo |
 | `original_path` | string | `documents/{uuid}.pdf` en el disco `local` |
@@ -132,13 +140,14 @@ export interface SignLink {
 
 | Columna | Tipo | Notas |
 | --- | --- | --- |
-| `id` | bigint PK | |
+| `id` | bigint PK | interno, solo para claves foráneas |
+| `uuid` | uuid, unique | identificador público del firmante como recurso (editor, reasignación) |
 | `document_id` | FK `documents`, cascade | |
 | `name`, `email` | string | |
 | `siglas` | string(4) | |
 | `color` | string(7) | uno de `#1792bb`, `#7a4fc9`, `#d27a1f`, `#2f9e6b` |
 | `position` | unsigned tinyint | orden, define el color |
-| `token` | string(64) null, unique | se genera al enviar con `Str::random(64)` |
+| `token` | string(36) null, unique | credencial del enlace de firma, distinta de `uuid`; se genera al enviar con `Str::uuid()` |
 | `signed_at` | timestamp null | |
 | `created_at`, `updated_at` | timestamps | |
 
@@ -146,12 +155,14 @@ export interface SignLink {
 
 | Columna | Tipo | Notas |
 | --- | --- | --- |
-| `id` | bigint PK | |
+| `id` | bigint PK | interno, solo para claves foráneas |
+| `uuid` | uuid, unique | identificador público del campo |
 | `document_id` | FK `documents`, cascade | |
 | `signer_id` | FK `signers`, cascade | |
 | `type` | string, default `firma` | `firma`, `iniciales`, `fecha`, `nombre` |
 | `page` | unsigned smallint | base 0 |
 | `x`, `y` | decimal(7,4) | % de la página, 0-100 |
+| `width`, `height` | decimal(6,2) | tamaño del campo en puntos; por defecto el de `type`, editable por campo |
 | `value_path` | string null | PNG de la firma en `signatures/{uuid}.png` |
 | `value_text` | string null | valor de texto (fecha, nombre) |
 | `created_at`, `updated_at` | timestamps | |
@@ -160,18 +171,22 @@ export interface SignLink {
 
 ### Modelos y reglas
 
+- `Document`, `Signer` y `SignField` usan el trait `App\Models\Concerns\HasUuid`: rellenan `uuid` con `Str::uuid()` al crearse (evento `creating`) y sobrescriben `getRouteKeyName()` para que las rutas y el enlace por modelo (`route()`, `redirect()->route(...)`) usen `uuid` en vez de `id`. El binding manual de `{document}` en `AppServiceProvider` (limitado a los documentos del usuario autenticado) también resuelve por `uuid`.
 - `Document`: `belongsTo` User, `hasMany` Signer y SignField. Cast `status` a `DocumentStatus`, `sent_at` y `completed_at` a fecha. Método `refreshStatus()` que pasa a `completado` cuando todos los firmantes tienen `signed_at`.
 - `Signer`: `belongsTo` Document, `hasMany` SignField. Estado de enlace `firmado` si `signed_at` no es null, si no `pendiente`.
-- `SignField`: `belongsTo` Document y Signer. El valor visible es la imagen (servida por ruta con token) o `value_text`.
+- `SignField`: `belongsTo` Document y Signer. Al crearse, si no llegan `width`/`height` toma el tamaño por defecto de su `type`. El valor visible es la imagen (servida por ruta con token, identificada por el `uuid` del campo) o `value_text`.
 - `User`: `hasMany` Document.
-- Enums `App\Enums\DocumentStatus` y `App\Enums\FieldType`, respaldados por string.
+- Enums `App\Enums\DocumentStatus` y `App\Enums\FieldType`, respaldados por string. `FieldType::size()` sigue dando el tamaño por defecto de cada tipo; el tamaño real de un campo ya creado es el de sus columnas `width`/`height`.
 - Factories para los tres modelos, con estados `pendiente()` y `completado()` en la de `Document`.
 - Al eliminar un `Document` (evento `deleting`) se borran sus archivos del disco.
 - Un documento solo se edita en `borrador`. Enviar exige al menos 1 firmante y 1 campo, y que cada firmante tenga al menos un campo.
 - Estado `pendiente` al enviar; `completado` cuando todos los firmantes tienen `signed_at`.
-- `App\Http\Resources\DocumentResource` entrega `id`, `name`, `status`, `date` (formato `29 sep 2026`), `pages`, `signers`, `fields` y `links` con la forma de `DocumentItem`.
+- `App\Http\Resources\DocumentResource` entrega `id` (el `uuid`), `name`, `status`, `date` (formato `29 sep 2026`), `pages`, `signers`, `fields` y `links` con la forma de `DocumentItem`. `SignerResource`, `PublicSignerResource` y `SignFieldResource` entregan `id` y `signerId` como `uuid`, nunca el `id` interno.
+- Los formularios que reciben un firmante por id (`POST .../fields`, `PATCH .../fields/{field}`) validan `signer_id` como el `uuid` del firmante (`Rule::exists('signers', 'uuid')->where('document_id', ...)`) y el controlador lo resuelve al `id` interno antes de guardar.
 
 ### Rutas
+
+`{document}`, `{signer}` y `{field}` se resuelven por su `uuid` (route model binding con `getRouteKeyName()` sobrescrito), no por el `id` interno; ninguna URL del panel expone un id incremental.
 
 | Ruta | Nombre | Acceso | Descripción |
 | --- | --- | --- | --- |
@@ -196,7 +211,7 @@ Reglas de acceso:
 
 - `{document}` se resuelve limitado a los documentos del usuario autenticado; si no existe o no es suyo, responde 404.
 - Un `{token}` inexistente responde 404.
-- Un firmante solo puede escribir en sus propios campos y solo mientras el documento está `pendiente`; si no, 403.
+- Un firmante solo puede escribir en sus propios campos y solo mientras el documento está `pendiente`; si no, 403. Un `{field}` que existe pero pertenece a otro documento también responde 403 en `sign.field` (comprobación explícita, ya que el binding por `uuid` no está limitado al documento del token) y 404 en `sign.image`.
 - Las rutas de firma llevan `throttle:60,1`. Todas las rutas mutantes usan la protección CSRF de Laravel.
 - Validación con Form Requests: `StoreDocumentRequest`, `StoreSignerRequest`, `StoreFieldRequest`, `UpdateFieldRequest`, `SignFieldRequest`.
 
@@ -276,6 +291,8 @@ Reglas de acceso:
 - [x] Agregar un firmante lo guarda en la base de datos y sobrevive a una recarga; eliminarlo borra también sus campos.
 - [x] Seleccionar un campo y pulsar Suprimir lo elimina; con el foco en un input, Suprimir no elimina el campo.
 - [x] Reasignar un campo a otro firmante cambia su color de inmediato y queda guardado.
+- [x] Con un campo seleccionado, cambiar "Ancho (pt)" o "Alto (pt)", o arrastrar el asa de su esquina, cambia el tamaño del campo en pantalla de inmediato y sobrevive a una recarga.
+- [x] Ninguna URL de `/documents`, del editor o de los enlaces de firma contiene un id numérico incremental; todas usan `uuid`.
 
 **Envío y enlaces**
 
@@ -334,6 +351,10 @@ Reglas de acceso:
 - **Yes:** la paleta solo tiene el campo "Firma", como el artifact. Los otros tipos existen en el modelo y se renderizan y estampan si vienen en los datos.
 - **Yes:** los documentos se editan solo en `borrador`. Evita que cambien campos ya enviados a los firmantes.
 - **Yes:** el botón "Probar el editor" apunta a `/documents`, porque ya no hay un id de ejemplo fijo garantizado. Sin sesión, `auth` lo manda a `/login`.
+- **Yes:** exponer `uuid` en vez del `id` incremental en toda URL, respuesta JSON y prop de Inertia de `Document`, `Signer` y `SignField` (decisión del usuario durante la implementación). Evita enumerar recursos ajenos por id secuencial; el `id` interno solo sirve de clave foránea. Se implementa con un trait `HasUuid` compartido en vez de repetir el evento `creating` y `getRouteKeyName()` en cada modelo.
+- **Yes:** el token del enlace de firma pasa de `Str::random(64)` a `Str::uuid()` (36 caracteres), por pedido explícito del usuario de un identificador "no tan largo". Sigue siendo distinto del `uuid` del firmante: el `uuid` identifica el recurso en el panel, el `token` es la credencial pública del enlace y se puede regenerar o revocar sin cambiar el primero.
+- **Yes:** ancho y alto de cada campo de firma son editables por campo, no fijos por `type` (decisión del usuario: "no siempre debe ser lo mismo"). El tamaño por defecto al crear un campo sigue viniendo de `FieldType::size()`. Al estampar, la imagen se ajusta ("contain") al tamaño guardado del campo, igual que ya se mostraba en pantalla.
+- **No:** dejar el ancho y el alto fijos por `type` como antes. No cubre firmas con proporciones distintas entre firmantes o documentos.
 
 ---
 

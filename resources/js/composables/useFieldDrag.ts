@@ -14,6 +14,8 @@ export type DragInit = {
     fieldId?: string;
     signerId: string;
     type: FieldType;
+    /** Field size in PDF points: the default for a new field, or the field's own for a move. */
+    size: { width: number; height: number };
     /** Offset in screen pixels from the top-left of the field to the pointer. */
     grab: { x: number; y: number };
 };
@@ -124,7 +126,7 @@ export function useFieldDrag(options: {
                     height: rect.height,
                 },
                 zoom: options.zoom.value,
-                type: state.type,
+                size: state.size,
             }),
         });
     }

@@ -19,12 +19,14 @@ class SignFieldResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => (string) $this->id,
+            'id' => $this->uuid,
             'type' => $this->type->value,
-            'signerId' => (string) $this->signer_id,
+            'signerId' => $this->signer->uuid,
             'page' => $this->page,
             'x' => $this->x,
             'y' => $this->y,
+            'width' => $this->width,
+            'height' => $this->height,
             'value' => $this->value(),
         ];
     }
@@ -39,10 +41,10 @@ class SignFieldResource extends JsonResource
             return $this->value_text;
         }
 
-        $token = $this->relationLoaded('signer') ? $this->signer->token : null;
+        $token = $this->signer->token;
 
         return $token === null
             ? null
-            : route('sign.image', ['token' => $token, 'field' => $this->id], false);
+            : route('sign.image', ['token' => $token, 'field' => $this->uuid], false);
     }
 }

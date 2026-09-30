@@ -67,7 +67,7 @@ class DocumentController extends Controller
 
         DB::transaction(function () use ($document, $signers) {
             foreach ($signers as $signer) {
-                $signer->update(['token' => Str::random(64)]);
+                $signer->update(['token' => (string) Str::uuid()]);
             }
 
             $document->update([
@@ -76,7 +76,7 @@ class DocumentController extends Controller
             ]);
         });
 
-        session()->flash('open_links', $document->id);
+        session()->flash('open_links', $document->uuid);
         session()->flash('links_generated', true);
 
         $document->load(['signers', 'fields.signer']);

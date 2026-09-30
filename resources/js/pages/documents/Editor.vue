@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, PenLine, Users } from '@lucide/vue';
+import { ArrowLeft, PenLine, Users, ZoomIn, ZoomOut } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import PdfPages from '@/components/PdfPages.vue';
@@ -18,8 +18,10 @@ import {
 } from '@/components/ui/sheet';
 import { Toaster } from '@/components/ui/sonner';
 import { useFieldDrag } from '@/composables/useFieldDrag';
+import { useFieldResize } from '@/composables/useFieldResize';
 import { usePageZoom } from '@/composables/usePageZoom';
 import type { DropResult } from '@/composables/useFieldDrag';
+import type { ResizeResult } from '@/composables/useFieldResize';
 import { ApiError, api } from '@/lib/api';
 import { FIELD_LABELS, FIELD_SIZES, SIGNER_COLORS } from '@/lib/documents';
 import { index, send } from '@/routes/documents';
@@ -54,7 +56,9 @@ const scroller = ref<HTMLElement | null>(null);
 const sheetOpen = ref(false);
 
 // Below 760px the page shrinks to fit the screen and the panels move to a bottom bar.
-const { isMobile, zoom } = usePageZoom(scroller);
+const { isMobile, zoom, canZoomIn, canZoomOut, zoomIn, zoomOut, resetZoom } =
+    usePageZoom(scroller);
+const zoomPercent = computed(() => Math.round(zoom.value * 100));
 
 const editable = computed(() => props.document.status === 'borrador');
 const canAddSigner = computed(
@@ -84,6 +88,74 @@ const subtitle = computed(() => {
 
 const { drag, start } = useFieldDrag({ zoom, scroller, onDrop: handleDrop });
 
+/** The field's size right before a drag-resize starts, to revert it if saving fails. */
+let resizeOriginal: { width: number; height: number } | null = null;
+
+const { start: startResize } = useFieldResize({
+    zoom,
+    onResize: (result) => applyFieldSize(result),
+    onFinish: (result) => void commitFieldSize(result),
+});
+
+function applyFieldSize(result: ResizeResult): void {
+    const field = fields.value.find((item) => item.id === result.fieldId);
+
+    if (field) {
+        Object.assign(field, { width: result.width, height: result.height });
+    }
+}
+
+async function commitFieldSize(result: ResizeResult): Promise<void> {
+    const field = fields.value.find((item) => item.id === result.fieldId);
+
+    if (!field || !editable.value) {
+        return;
+    }
+
+    try {
+        await api(
+            'PATCH',
+            updateField({ document: props.document.id, field: field.id }).url,
+            { width: result.width, height: result.height },
+        );
+    } catch (error) {
+        if (resizeOriginal) {
+            Object.assign(field, resizeOriginal);
+        }
+
+        toast.error(
+            error instanceof ApiError
+                ? error.first()
+                : 'No se pudo cambiar el tamaño del campo.',
+        );
+    } finally {
+        resizeOriginal = null;
+    }
+}
+
+function startFieldResize(
+    event: PointerEvent,
+    field: SignField,
+    pageWidth: number,
+    pageHeight: number,
+): void {
+    if (!editable.value) {
+        return;
+    }
+
+    resizeOriginal = { width: field.width, height: field.height };
+
+    startResize(event, {
+        fieldId: field.id,
+        x: field.x,
+        y: field.y,
+        width: field.width,
+        height: field.height,
+        pageWidth,
+        pageHeight,
+    });
+}
+
 const ghost = computed(() => {
     const state = drag.value;
 
@@ -91,7 +163,6 @@ const ghost = computed(() => {
         return null;
     }
 
-    const size = FIELD_SIZES[state.type];
     const signer = signersById.value.get(state.signerId);
 
     return {
@@ -101,8 +172,8 @@ const ghost = computed(() => {
         style: {
             left: `${state.pointer.x - state.grab.x}px`,
             top: `${state.pointer.y - state.grab.y}px`,
-            width: `${size.width * zoom.value}px`,
-            height: `${size.height * zoom.value}px`,
+            width: `${state.size.width * zoom.value}px`,
+            height: `${state.size.height * zoom.value}px`,
         },
     };
 });
@@ -126,6 +197,7 @@ function startPaletteDrag(event: PointerEvent, type: FieldType): void {
         kind: 'new',
         signerId: activeSignerId.value,
         type,
+        size,
         grab: {
             x: (size.width * zoom.value) / 2,
             y: (size.height * zoom.value) / 2,
@@ -147,6 +219,7 @@ function startFieldDrag(event: PointerEvent, field: SignField): void {
         fieldId: field.id,
         signerId: field.signerId,
         type: field.type,
+        size: { width: field.width, height: field.height },
         grab: { x: event.clientX - box.left, y: event.clientY - box.top },
     });
 }
@@ -164,7 +237,7 @@ async function handleDrop(drop: DropResult): Promise<void> {
                 'POST',
                 storeField(props.document.id).url,
                 {
-                    signer_id: Number(drop.signerId),
+                    signer_id: drop.signerId,
                     type: drop.type,
                     page: drop.page,
                     x: drop.x,
@@ -202,7 +275,7 @@ async function handleDrop(drop: DropResult): Promise<void> {
             'PATCH',
             updateField({
                 document: props.document.id,
-                field: Number(field.id),
+                field: field.id,
             }).url,
             { page: drop.page, x: drop.x, y: drop.y },
         );
@@ -231,9 +304,9 @@ async function reassignField(signerId: unknown): Promise<void> {
             'PATCH',
             updateField({
                 document: props.document.id,
-                field: Number(field.id),
+                field: field.id,
             }).url,
-            { signer_id: Number(signerId) },
+            { signer_id: signerId },
         );
     } catch (error) {
         field.signerId = previous;
@@ -241,6 +314,35 @@ async function reassignField(signerId: unknown): Promise<void> {
             error instanceof ApiError
                 ? error.first()
                 : 'No se pudo reasignar el campo.',
+        );
+    }
+}
+
+async function resizeField(size: { width: number; height: number }): Promise<void> {
+    const field = selectedField.value;
+
+    if (!field || !editable.value) {
+        return;
+    }
+
+    const previous = { width: field.width, height: field.height };
+    Object.assign(field, size);
+
+    try {
+        await api(
+            'PATCH',
+            updateField({
+                document: props.document.id,
+                field: field.id,
+            }).url,
+            size,
+        );
+    } catch (error) {
+        Object.assign(field, previous);
+        toast.error(
+            error instanceof ApiError
+                ? error.first()
+                : 'No se pudo cambiar el tamaño del campo.',
         );
     }
 }
@@ -257,7 +359,7 @@ async function deleteSelectedField(): Promise<void> {
             'DELETE',
             destroyField({
                 document: props.document.id,
-                field: Number(field.id),
+                field: field.id,
             }).url,
         );
     } catch (error) {
@@ -409,7 +511,7 @@ async function removeSigner(signer: Signer): Promise<void> {
             'DELETE',
             destroySigner({
                 document: props.document.id,
-                signer: Number(signer.id),
+                signer: signer.id,
             }).url,
         );
     } catch (error) {
@@ -493,7 +595,7 @@ async function removeSigner(signer: Signer): Promise<void> {
             </Button>
         </header>
 
-        <div class="flex min-h-0 flex-1">
+        <div class="relative flex min-h-0 flex-1">
             <aside
                 v-if="!isMobile"
                 class="w-[300px] shrink-0 overflow-y-auto border-r border-border bg-white p-4"
@@ -535,6 +637,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                     :field="selectedField"
                     :signers="signers"
                     @reassign="reassignField"
+                    @resize="resizeField"
                     @remove="deleteSelectedField"
                 />
 
@@ -575,6 +678,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                                 :page-height="height"
                                 :zoom="zoom"
                                 :selected="selectedFieldId === field.id"
+                                :resizable="editable"
                                 :class="[
                                     editable ? 'cursor-grab' : '',
                                     movingFieldId === field.id
@@ -582,11 +686,59 @@ async function removeSigner(signer: Signer): Promise<void> {
                                         : '',
                                 ]"
                                 @pointerdown="startFieldDrag($event, field)"
+                                @resize-start="
+                                    startFieldResize(
+                                        $event,
+                                        field,
+                                        width,
+                                        height,
+                                    )
+                                "
                             />
                         </template>
                     </template>
                 </PdfPages>
             </main>
+
+            <div
+                v-if="!isMobile"
+                class="absolute right-6 bottom-6 z-20 flex items-center gap-1 rounded-full border border-border bg-white p-1 shadow-md"
+                data-test="zoom-controls"
+            >
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    class="size-8 rounded-full"
+                    aria-label="Alejar"
+                    :disabled="!canZoomOut"
+                    data-test="zoom-out"
+                    @click="zoomOut"
+                >
+                    <ZoomOut class="size-4" />
+                </Button>
+                <button
+                    type="button"
+                    class="min-w-[3.5ch] px-1 text-center text-xs font-semibold text-muted-foreground tabular-nums hover:text-foreground"
+                    aria-label="Restablecer zoom"
+                    data-test="zoom-reset"
+                    @click="resetZoom"
+                >
+                    {{ zoomPercent }}%
+                </button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    class="size-8 rounded-full"
+                    aria-label="Acercar"
+                    :disabled="!canZoomIn"
+                    data-test="zoom-in"
+                    @click="zoomIn"
+                >
+                    <ZoomIn class="size-4" />
+                </Button>
+            </div>
         </div>
 
         <div

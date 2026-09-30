@@ -36,7 +36,7 @@ class SignController extends Controller
 
         return Inertia::render('sign/Show', [
             'document' => [
-                'id' => $document->id,
+                'id' => $document->uuid,
                 'name' => $document->name,
                 'status' => $document->status->value,
                 'pages' => $document->pages,
@@ -46,6 +46,7 @@ class SignController extends Controller
             'signer' => [
                 ...(new PublicSignerResource($signer))->resolve(),
                 'email' => $signer->email,
+                'token' => $signer->token,
                 'link' => url('/sign/'.$signer->token),
             ],
             'pdfUrl' => route('sign.file', $token, false),
@@ -68,14 +69,11 @@ class SignController extends Controller
     /**
      * The signature image of a field of the signer's document.
      */
-    public function image(string $token, int $field): StreamedResponse
+    public function image(string $token, SignField $field): StreamedResponse
     {
         $signer = $this->signer($token);
 
-        $field = SignField::query()
-            ->where('document_id', $signer->document_id)
-            ->whereNotNull('value_path')
-            ->findOrFail($field);
+        abort_unless($field->document_id === $signer->document_id && $field->value_path !== null, 404);
 
         return Storage::disk('local')->response($field->value_path, null, [
             'Content-Type' => 'image/png',
@@ -86,7 +84,7 @@ class SignController extends Controller
     /**
      * Save the signature image of one of the signer's own fields.
      */
-    public function field(SignFieldRequest $request, string $token, int $field): SignFieldResource
+    public function field(SignFieldRequest $request, string $token, SignField $field): SignFieldResource
     {
         $signer = $this->signer($token);
 
@@ -96,9 +94,7 @@ class SignController extends Controller
             403,
         );
 
-        $field = SignField::query()->where('document_id', $signer->document_id)->findOrFail($field);
-
-        abort_unless($field->signer_id === $signer->id, 403);
+        abort_unless($field->document_id === $signer->document_id && $field->signer_id === $signer->id, 403);
 
         $previous = $field->value_path;
         $path = 'signatures/'.Str::uuid().'.png';
@@ -154,7 +150,7 @@ class SignController extends Controller
         }
 
         // The list opens this document's links; the toast tells what happened.
-        session()->flash('open_links', $signer->document_id);
+        session()->flash('open_links', $signer->document->uuid);
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => $completed

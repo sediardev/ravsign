@@ -65,8 +65,8 @@ class SignFieldTest extends TestCase
         $this->assertMatchesRegularExpression('#^signatures/[0-9a-f-]{36}\.png$#', $field->value_path);
         Storage::disk('local')->assertExists($field->value_path);
 
-        $response->assertJsonPath('data.id', (string) $field->id)
-            ->assertJsonPath('data.value', "/sign/{$this->carlos->token}/fields/{$field->id}/image");
+        $response->assertJsonPath('data.id', $field->uuid)
+            ->assertJsonPath('data.value', "/sign/{$this->carlos->token}/fields/{$field->uuid}/image");
     }
 
     public function test_the_saved_file_is_a_png()
@@ -106,11 +106,11 @@ class SignFieldTest extends TestCase
         $this->assertSame([], Storage::disk('local')->allFiles());
     }
 
-    public function test_a_field_of_another_document_is_not_found()
+    public function test_a_field_of_another_document_cannot_be_signed()
     {
         $foreign = SignField::factory()->create();
 
-        $this->sign($this->carlos, $foreign)->assertNotFound();
+        $this->sign($this->carlos, $foreign)->assertForbidden();
     }
 
     public function test_an_unknown_token_is_not_found()

@@ -22,7 +22,7 @@ class DocumentResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'name' => $this->name,
             'status' => $this->status->value,
             'date' => $this->formattedDate(),
@@ -32,7 +32,7 @@ class DocumentResource extends JsonResource
             'links' => $this->signers
                 ->filter(fn (Signer $signer) => $signer->token !== null)
                 ->map(fn (Signer $signer) => [
-                    'signerId' => (string) $signer->id,
+                    'signerId' => $signer->uuid,
                     'url' => url('/sign/'.$signer->token),
                     'token' => $signer->token,
                     'status' => $signer->linkStatus(),

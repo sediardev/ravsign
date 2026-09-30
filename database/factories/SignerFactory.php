@@ -31,7 +31,7 @@ class SignerFactory extends Factory
 
     public function withToken(): static
     {
-        return $this->state(fn () => ['token' => Str::random(64)]);
+        return $this->state(fn () => ['token' => (string) Str::uuid()]);
     }
 
     public function signed(): static

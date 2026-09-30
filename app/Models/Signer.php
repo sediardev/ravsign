@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasUuid;
 use Database\Factories\SignerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
+ * @property string $uuid
  * @property int $document_id
  * @property string $name
  * @property string $email
@@ -27,7 +29,7 @@ use Illuminate\Support\Carbon;
 class Signer extends Model
 {
     /** @use HasFactory<SignerFactory> */
-    use HasFactory;
+    use HasFactory, HasUuid;
 
     public const COLORS = ['#1792bb', '#7a4fc9', '#d27a1f', '#2f9e6b'];
 

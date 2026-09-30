@@ -91,7 +91,7 @@ export interface SignField {
 }
 
 export interface DocumentItem {
-    id: number;
+    id: string; // uuid, no el id incremental interno (ver SPEC 03)
     name: string;
     status: DocumentStatus;
     date: string; // ya formateada, '29 sep 2026'

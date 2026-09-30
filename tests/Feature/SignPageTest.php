@@ -52,7 +52,7 @@ class SignPageTest extends TestCase
                 ->where('document.status', 'pendiente')
                 ->has('document.signers', 2)
                 ->has('document.fields', 2)
-                ->where('signer.id', (string) $this->carlos->id)
+                ->where('signer.id', $this->carlos->uuid)
                 ->where('signer.name', 'Carlos Ruiz')
                 ->where('signer.email', 'carlos@x.com')
                 ->where('signer.link', url('/sign/'.$this->carlos->token))
@@ -120,7 +120,7 @@ class SignPageTest extends TestCase
 
         $this->get(route('sign.show', $this->carlos->token))
             ->assertInertia(fn (Assert $page) => $page
-                ->where('document.fields.0.value', "/sign/{$this->lucia->token}/fields/{$image->id}/image")
+                ->where('document.fields.0.value', "/sign/{$this->lucia->token}/fields/{$image->uuid}/image")
                 ->where('document.fields.1.value', 'Carlos Ruiz'));
     }
 }

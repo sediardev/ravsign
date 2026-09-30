@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Enums\DocumentStatus;
-use App\Enums\FieldType;
 use App\Models\Document;
 use App\Models\Signer;
 use App\Models\SignField;
@@ -133,7 +132,7 @@ class SignedPdfTest extends TestCase
         $builder = app(SignedPdfBuilder::class);
 
         // Letter page, signature field at 11.1 % / 63.6 %: 176 x 58 pt with 3 pt of padding.
-        $box = $builder->placement(11.1, 63.6, FieldType::Firma, 612, 792, 200, 50);
+        $box = $builder->placement(11.1, 63.6, 176, 58, 612, 792, 200, 50);
 
         $this->assertEqualsWithDelta(170, $box['width'], 0.001);
         $this->assertEqualsWithDelta(42.5, $box['height'], 0.001);
@@ -147,7 +146,7 @@ class SignedPdfTest extends TestCase
 
     public function test_a_tall_signature_is_limited_by_the_field_height()
     {
-        $box = app(SignedPdfBuilder::class)->placement(0, 0, FieldType::Firma, 612, 792, 50, 100);
+        $box = app(SignedPdfBuilder::class)->placement(0, 0, 176, 58, 612, 792, 50, 100);
 
         $this->assertEqualsWithDelta(52, $box['height'], 0.001);
         $this->assertEqualsWithDelta(26, $box['width'], 0.001);
@@ -155,7 +154,7 @@ class SignedPdfTest extends TestCase
 
     public function test_the_position_follows_the_real_page_size_not_letter()
     {
-        $box = app(SignedPdfBuilder::class)->placement(50, 50, FieldType::Firma, 595.28, 841.89, 170, 52);
+        $box = app(SignedPdfBuilder::class)->placement(50, 50, 176, 58, 595.28, 841.89, 170, 52);
 
         $this->assertEqualsWithDelta(595.28 / 2 + 3, $box['x'], 0.01);
         $this->assertEqualsWithDelta(841.89 / 2 + 3, $box['y'], 0.01);

@@ -44,11 +44,11 @@ class DocumentEditorTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('documents/Editor')
-                ->where('document.id', $document->id)
+                ->where('document.id', $document->uuid)
                 ->where('document.status', 'borrador')
                 ->where('document.signers.0.name', 'Carlos Ruiz')
                 ->where('document.fields.0.page', 1)
-                ->where('pdfUrl', "/documents/{$document->id}/file"));
+                ->where('pdfUrl', "/documents/{$document->uuid}/file"));
     }
 
     public function test_someone_elses_or_a_missing_document_is_not_found()
@@ -164,11 +164,11 @@ class DocumentEditorTest extends TestCase
         $this->actingAs($this->user);
 
         $id = $this->postJson(route('fields.store', $document), [
-            'signer_id' => $first->id, 'page' => 1, 'x' => 11.1, 'y' => 63.6,
+            'signer_id' => $first->uuid, 'page' => 1, 'x' => 11.1, 'y' => 63.6,
         ])
             ->assertCreated()
             ->assertJsonPath('data.type', 'firma')
-            ->assertJsonPath('data.signerId', (string) $first->id)
+            ->assertJsonPath('data.signerId', $first->uuid)
             ->assertJsonPath('data.page', 1)
             ->json('data.id');
 
@@ -177,9 +177,9 @@ class DocumentEditorTest extends TestCase
             ->assertJsonPath('data.page', 0)
             ->assertJsonPath('data.x', 25.5);
 
-        $this->patchJson(route('fields.update', [$document, $id]), ['signer_id' => $second->id])
+        $this->patchJson(route('fields.update', [$document, $id]), ['signer_id' => $second->uuid])
             ->assertOk()
-            ->assertJsonPath('data.signerId', (string) $second->id)
+            ->assertJsonPath('data.signerId', $second->uuid)
             ->assertJsonPath('data.x', 25.5);
 
         $this->deleteJson(route('fields.destroy', [$document, $id]))->assertNoContent();
@@ -193,9 +193,9 @@ class DocumentEditorTest extends TestCase
         $foreignSigner = Signer::factory()->create();
         $this->actingAs($this->user);
 
-        $valid = ['signer_id' => $signer->id, 'page' => 0, 'x' => 10, 'y' => 10];
+        $valid = ['signer_id' => $signer->uuid, 'page' => 0, 'x' => 10, 'y' => 10];
 
-        $this->postJson(route('fields.store', $document), [...$valid, 'signer_id' => $foreignSigner->id])
+        $this->postJson(route('fields.store', $document), [...$valid, 'signer_id' => $foreignSigner->uuid])
             ->assertJsonValidationErrors('signer_id');
         $this->postJson(route('fields.store', $document), [...$valid, 'page' => 2])
             ->assertJsonValidationErrors('page');
@@ -229,7 +229,7 @@ class DocumentEditorTest extends TestCase
 
             $this->postJson(route('signers.store', $document), ['name' => 'Ana', 'email' => 'a@x.com'])->assertForbidden();
             $this->deleteJson(route('signers.destroy', [$document, $signer]))->assertForbidden();
-            $this->postJson(route('fields.store', $document), ['signer_id' => $signer->id, 'page' => 0, 'x' => 1, 'y' => 1])->assertForbidden();
+            $this->postJson(route('fields.store', $document), ['signer_id' => $signer->uuid, 'page' => 0, 'x' => 1, 'y' => 1])->assertForbidden();
             $this->patchJson(route('fields.update', [$document, $field]), ['x' => 5])->assertForbidden();
             $this->deleteJson(route('fields.destroy', [$document, $field]))->assertForbidden();
 

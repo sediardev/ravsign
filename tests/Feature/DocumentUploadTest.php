@@ -42,7 +42,7 @@ class DocumentUploadTest extends TestCase
         $response = $this->actingAs($user)->post(route('documents.store'), ['file' => $this->samplePdf()]);
 
         $document = Document::firstOrFail();
-        $response->assertRedirect("/documents/{$document->id}/editor");
+        $response->assertRedirect("/documents/{$document->uuid}/editor");
 
         $this->assertSame($user->id, $document->user_id);
         $this->assertSame('Contrato.pdf', $document->name);

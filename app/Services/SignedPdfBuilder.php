@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\FieldType;
 use App\Models\Document;
 use App\Models\SignField;
 use Illuminate\Support\Facades\Storage;
@@ -75,14 +74,13 @@ class SignedPdfBuilder
     public function placement(
         float $xPercent,
         float $yPercent,
-        FieldType $type,
+        float $fieldWidth,
+        float $fieldHeight,
         float $pageWidth,
         float $pageHeight,
         int $imageWidth,
         int $imageHeight,
     ): array {
-        [$fieldWidth, $fieldHeight] = $type->size();
-
         $left = $xPercent / 100 * $pageWidth;
         $top = $yPercent / 100 * $pageHeight;
 
@@ -125,7 +123,7 @@ class SignedPdfBuilder
             return;
         }
 
-        $box = $this->placement($field->x, $field->y, $field->type, $pageWidth, $pageHeight, $info[0], $info[1]);
+        $box = $this->placement($field->x, $field->y, $field->width, $field->height, $pageWidth, $pageHeight, $info[0], $info[1]);
 
         // FPDF reads images from files, so hand it a temporary one.
         $temp = tempnam(sys_get_temp_dir(), 'sig');
@@ -140,7 +138,8 @@ class SignedPdfBuilder
 
     private function stampText(Fpdi $pdf, SignField $field, float $pageWidth, float $pageHeight): void
     {
-        [$fieldWidth, $fieldHeight] = $field->type->size();
+        $fieldWidth = $field->width;
+        $fieldHeight = $field->height;
 
         $pdf->SetFont('Helvetica', 'I', 14);
         $pdf->SetTextColor(26, 53, 96);

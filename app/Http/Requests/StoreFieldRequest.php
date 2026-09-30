@@ -23,11 +23,13 @@ class StoreFieldRequest extends FormRequest
         $document = $this->document();
 
         return [
-            'signer_id' => ['required', 'integer', Rule::exists('signers', 'id')->where('document_id', $document->id)],
+            'signer_id' => ['required', 'string', Rule::exists('signers', 'uuid')->where('document_id', $document->id)],
             'type' => ['nullable', Rule::enum(FieldType::class)],
             'page' => ['required', 'integer', 'min:0', 'max:'.max(0, $document->pages - 1)],
             'x' => ['required', 'numeric', 'between:0,100'],
             'y' => ['required', 'numeric', 'between:0,100'],
+            'width' => ['nullable', 'numeric', 'between:24,400'],
+            'height' => ['nullable', 'numeric', 'between:16,200'],
         ];
     }
 

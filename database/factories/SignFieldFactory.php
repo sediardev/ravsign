@@ -18,6 +18,8 @@ class SignFieldFactory extends Factory
      */
     public function definition(): array
     {
+        [$width, $height] = FieldType::Firma->size();
+
         return [
             'document_id' => Document::factory(),
             'signer_id' => Signer::factory(),
@@ -25,6 +27,8 @@ class SignFieldFactory extends Factory
             'page' => 0,
             'x' => 11.1,
             'y' => 63.6,
+            'width' => $width,
+            'height' => $height,
         ];
     }
 }

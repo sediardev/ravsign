@@ -12,7 +12,7 @@ type Filter = 'todos' | DocumentStatus;
 const props = defineProps<{
     documents: DocumentItem[];
     /** Set right after sending a document: its links open straight away. */
-    openLinks?: number | null;
+    openLinks?: string | null;
     /** True right after sending: the links were just created. */
     linksGenerated?: boolean;
 }>();
@@ -46,7 +46,7 @@ const dragOver = ref(false);
 const uploading = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 const linksOpen = ref(false);
-const linksDocumentId = ref<number | null>(null);
+const linksDocumentId = ref<string | null>(null);
 
 const linksDocument = computed(
     () => props.documents.find((d) => d.id === linksDocumentId.value) ?? null,
@@ -82,7 +82,7 @@ const rows = computed(() =>
 );
 
 /** A draft opens its editor; a sent or completed document opens its links. */
-function openDocument(id: number): void {
+function openDocument(id: string): void {
     const document = props.documents.find((d) => d.id === id);
 
     if (!document) {

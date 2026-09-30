@@ -64,7 +64,7 @@ class FullSigningFlowTest extends TestCase
                 ->json('data.id');
 
             $this->postJson(route('fields.store', $document), [
-                'signer_id' => (int) $signerId,
+                'signer_id' => $signerId,
                 'page' => 1,
                 'x' => $i === 0 ? 11.1 : 56.9,
                 'y' => 63.6,
@@ -94,7 +94,7 @@ class FullSigningFlowTest extends TestCase
 
             $this->get(route('sign.file', $token))->assertOk();
 
-            $fieldId = $document->fields()->where('signer_id', $ids[$i])->value('id');
+            $fieldId = $document->fields()->whereHas('signer', fn ($q) => $q->where('uuid', $ids[$i]))->value('uuid');
 
             $this->postJson(route('sign.finish', $token))
                 ->assertUnprocessable()

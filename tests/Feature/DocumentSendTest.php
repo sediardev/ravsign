@@ -53,7 +53,7 @@ class DocumentSendTest extends TestCase
 
         $tokens = $document->signers()->pluck('token');
         $this->assertCount(2, $tokens->unique());
-        $tokens->each(fn ($token) => $this->assertSame(64, strlen($token)));
+        $tokens->each(fn ($token) => $this->assertSame(36, strlen($token)));
 
         $link = $response->json('data.links.0');
         $this->assertSame(url('/sign/'.$link['token']), $link['url']);
@@ -136,7 +136,7 @@ class DocumentSendTest extends TestCase
 
         $this->get(route('documents.index'))
             ->assertInertia(fn (Assert $page) => $page
-                ->where('openLinks', $document->id)
+                ->where('openLinks', $document->uuid)
                 ->where('linksGenerated', true)
                 ->has('documents.0.links', 2));
 

@@ -128,7 +128,7 @@ class SignFinishTest extends TestCase
         $this->field($this->lucia, signed: false);
 
         $this->finish($this->carlos)
-            ->assertSessionHas('open_links', $this->document->id)
+            ->assertSessionHas('open_links', $this->document->uuid)
             ->assertSessionHas('inertia.flash_data.toast.type', 'success')
             ->assertSessionHas('inertia.flash_data.toast.message', 'Tu firma quedó registrada. Falta que firmen los demás.');
     }
@@ -143,7 +143,7 @@ class SignFinishTest extends TestCase
         $this->actingAs($this->document->user)
             ->get(route('documents.index'))
             ->assertInertia(fn (Assert $page) => $page
-                ->where('openLinks', $this->document->id)
+                ->where('openLinks', $this->document->uuid)
                 ->where('linksGenerated', false)
                 ->where('documents.0.links.0.status', 'firmado'));
     }

@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         // A {document} is only ever resolved among the authenticated user's own documents.
-        Route::bind('document', fn (string $value) => Auth::user()?->documents()->whereKey($value)->firstOrFail()
+        Route::bind('document', fn (string $value) => Auth::user()?->documents()->where('uuid', $value)->firstOrFail()
             ?? abort(404));
     }
 

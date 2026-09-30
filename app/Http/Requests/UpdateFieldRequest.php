@@ -22,10 +22,12 @@ class UpdateFieldRequest extends FormRequest
         $document = $this->document();
 
         return [
-            'signer_id' => ['sometimes', 'integer', Rule::exists('signers', 'id')->where('document_id', $document->id)],
+            'signer_id' => ['sometimes', 'string', Rule::exists('signers', 'uuid')->where('document_id', $document->id)],
             'page' => ['sometimes', 'integer', 'min:0', 'max:'.max(0, $document->pages - 1)],
             'x' => ['sometimes', 'numeric', 'between:0,100'],
             'y' => ['sometimes', 'numeric', 'between:0,100'],
+            'width' => ['sometimes', 'numeric', 'between:24,400'],
+            'height' => ['sometimes', 'numeric', 'between:16,200'],
         ];
     }
 

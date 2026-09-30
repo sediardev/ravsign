@@ -72,7 +72,7 @@ async function finish(): Promise<void> {
     finishing.value = true;
 
     try {
-        await api('POST', finishRoute({ token: token.value }).url);
+        await api('POST', finishRoute({ token: props.signer.token }).url);
     } catch (error) {
         finishing.value = false;
         toast.error(
@@ -92,9 +92,6 @@ async function finish(): Promise<void> {
         },
     });
 }
-
-/** The token is the last segment of the signer's own link. */
-const token = computed(() => props.signer.link.split('/').pop() ?? '');
 
 /** Signatures adopted in this visit, by signer and field type, in memory only. */
 const adopted = ref<Record<string, string>>({});
@@ -144,7 +141,7 @@ async function applySignature(
     try {
         await api(
             'POST',
-            signFieldRoute({ token: token.value, field: Number(field.id) }).url,
+            signFieldRoute({ token: props.signer.token, field: field.id }).url,
             { image: dataUrl },
         );
     } catch (error) {
