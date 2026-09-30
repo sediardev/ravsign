@@ -1,27 +1,21 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import Heading from '@/components/Heading.vue';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editProfile } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Profile',
+        title: 'Perfil',
         href: editProfile(),
     },
     {
-        title: 'Security',
+        title: 'Seguridad',
         href: editSecurity(),
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
     },
 ];
 
@@ -29,40 +23,42 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
 
 <template>
-    <div class="px-4 py-6">
+    <div
+        class="px-[clamp(16px,4vw,40px)] py-[clamp(16px,4vw,32px)]"
+    >
         <Heading
-            title="Settings"
-            description="Manage your profile and account settings"
+            title="Ajustes"
+            description="Administra tu perfil y la seguridad de tu cuenta"
         />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
                 <nav
                     class="flex flex-col space-y-1 space-x-0"
-                    aria-label="Settings"
+                    aria-label="Ajustes"
                 >
-                    <Button
+                    <Link
                         v-for="item in sidebarNavItems"
                         :key="toUrl(item.href)"
-                        variant="ghost"
-                        :class="[
-                            'w-full justify-start',
-                            { 'bg-muted': isCurrentOrParentUrl(item.href) },
-                        ]"
-                        as-child
+                        :href="item.href"
+                        class="rounded-lg px-3 py-[11px] text-sm transition-colors"
+                        :class="
+                            isCurrentOrParentUrl(item.href)
+                                ? 'bg-accent font-semibold text-foreground'
+                                : 'font-medium text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                        "
                     >
-                        <Link :href="item.href">
-                            <component :is="item.icon" class="h-4 w-4" />
-                            {{ item.title }}
-                        </Link>
-                    </Button>
+                        {{ item.title }}
+                    </Link>
                 </nav>
             </aside>
 
             <Separator class="my-6 lg:hidden" />
 
             <div class="flex-1 md:max-w-2xl">
-                <section class="max-w-xl space-y-12">
+                <section
+                    class="max-w-xl space-y-12 rounded-[14px] border border-border bg-white p-[clamp(16px,3vw,28px)]"
+                >
                     <slot />
                 </section>
             </div>
