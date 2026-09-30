@@ -87,18 +87,18 @@ FILESYSTEM_DISK=local
 
 ## Acceptance criteria
 
-- [ ] `composer show laravel/framework` en el repo indica versión 13.x.
-- [ ] `php artisan serve` levanta la app y `/` responde con HTTP 200.
-- [ ] Se puede registrar un usuario, cerrar sesión e iniciar sesión de nuevo desde la interfaz Vue.
-- [ ] `php artisan migrate:status` muestra todas las migraciones como ejecutadas contra MySQL.
-- [ ] `composer.json` contiene `"platform": { "php": "8.4" }` y `composer install --no-dev` funciona sin errores.
-- [ ] `composer show setasign/fpdi` y `npm ls pdfjs-dist signature_pad` listan las tres dependencias.
-- [ ] `public/build/manifest.json` está trackeado en git y `git check-ignore public/build` no devuelve nada.
-- [ ] `vendor/`, `node_modules/` y `.env` están ignorados por git.
-- [ ] La app renderiza en el navegador usando solo `public/build` (sin `npm run dev` corriendo).
-- [ ] `.env.example` contiene exactamente las variables de la sección Data model.
-- [ ] `README.md` documenta instalación local y deploy en hosting.
-- [ ] Un archivo colocado en `storage/app/private` no devuelve 200 al pedirlo por URL (404 en `/private/...`, 403 en `/storage/...`).
+- [x] `composer show laravel/framework` en el repo indica versión 13.x.
+- [x] `php artisan serve` levanta la app y `/` responde con HTTP 200.
+- [x] Se puede registrar un usuario, cerrar sesión e iniciar sesión de nuevo desde la interfaz Vue.
+- [x] `php artisan migrate:status` muestra todas las migraciones como ejecutadas contra MySQL.
+- [x] `composer.json` contiene `"platform": { "php": "8.4" }` y `composer install --no-dev` funciona sin errores.
+- [x] `composer show setasign/fpdi` y `npm ls pdfjs-dist signature_pad` listan las tres dependencias.
+- [x] `public/build/manifest.json` está trackeado en git y `git check-ignore public/build` no devuelve nada.
+- [x] `vendor/`, `node_modules/` y `.env` están ignorados por git.
+- [x] La app renderiza en el navegador usando solo `public/build` (sin `npm run dev` corriendo).
+- [x] `.env.example` contiene exactamente las variables de la sección Data model.
+- [x] `README.md` documenta instalación local y deploy en hosting.
+- [x] Un archivo colocado en `storage/app/private` no devuelve 200 al pedirlo por URL (404 en `/private/...`, 403 en `/storage/...`).
 
 ---
 

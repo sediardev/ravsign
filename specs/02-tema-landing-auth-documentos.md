@@ -1,6 +1,6 @@
 # SPEC 02 — Tema visual, landing, autenticación y listado de documentos
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-09-29
 > **Objective:** Aplicar el diseño del artifact de Ravsign (paleta, fuentes, logos) al starter kit y construir en Vue la landing, el registro/login, el listado de Documentos y los ajustes, con datos de ejemplo y sin backend de documentos.
@@ -148,32 +148,32 @@ Rutas nuevas y modificadas:
 
 ## Acceptance criteria
 
-- [ ] `php artisan test` pasa completo.
-- [ ] `npm run types:check` termina sin errores.
-- [ ] `npm run build` termina sin errores y `public/build/manifest.json` está actualizado.
-- [ ] Ninguna página hace peticiones a `fonts.googleapis.com`, `fonts.bunny.net` ni se usa la fuente Instrument Sans.
-- [ ] El texto de los títulos se renderiza con Poppins y el cuerpo con Montserrat (verificable con `getComputedStyle`).
-- [ ] El botón primario tiene fondo `rgb(23, 146, 187)` y cambia a `rgb(19, 128, 165)` en hover.
-- [ ] `GET /` responde 200 sin sesión y muestra "Firma y envía documentos en minutos.", "Cómo funciona" y "Funciones".
-- [ ] Los botones "Iniciar sesión" y "Empezar gratis" de la landing llevan a `/login` y `/register`.
-- [ ] Registrar un usuario nuevo con nombre, correo y contraseña redirige a `/documents` sin pedir verificación de correo.
-- [ ] El formulario de registro no tiene campo "Empresa".
-- [ ] El panel azul marino con los 3 pasos aparece en `/login` y `/register` a 1280 px de ancho y no aparece a 375 px.
-- [ ] Cerrar sesión desde el sidebar lleva a `/` y `GET /documents` sin sesión redirige a `/login`.
-- [ ] `GET /dashboard` con sesión redirige a `/documents`.
-- [ ] `/documents` muestra 4 filas con los nombres, estados y fechas de la tabla del Data model.
-- [ ] Los contadores de filtros muestran Todos 4, Borradores 2, Pendientes 1 y Completados 1, y cada filtro deja solo las filas de su estado.
-- [ ] Un filtro sin resultados muestra "No hay documentos en esta vista."
-- [ ] Hacer clic en "Subir documento" o soltar un archivo en la zona muestra el aviso y no abre el selector de archivos ni envía peticiones al servidor.
-- [ ] A 375 px de ancho `/`, `/login`, `/register` y `/documents` no tienen scroll horizontal, y `/documents` muestra tarjetas en lugar de tabla.
-- [ ] `/settings/profile` y `/settings/security` cargan con el tema nuevo y siguen guardando cambios.
-- [ ] La ruta `/settings/appearance` responde 404.
-- [ ] `resources/js/pages/auth/VerifyEmail.vue` y `resources/js/pages/Dashboard.vue` ya no existen.
-- [ ] `php artisan route:list` no muestra ninguna ruta con `passkey` y `grep -ri passkey app routes config resources/js/components resources/js/pages` no devuelve resultados.
-- [ ] `/login`, `/user/confirm-password` y `/settings/security` no muestran ningún texto ni botón de passkey.
-- [ ] `package.json` no contiene `@laravel/passkeys` ni `vue-input-otp`.
-- [ ] `php artisan route:list` no muestra rutas `two-factor` y `/settings/security` solo ofrece cambiar la contraseña, sin sección de verificación en dos pasos.
-- [ ] El HTML de cualquier página incluye `<link rel="icon" href="/img/icon.svg">`, y `GET /favicon.ico` y `GET /apple-touch-icon.png` responden 200 con la imagen del isotipo de Ravsign (no el logo de Laravel).
+- [x] `php artisan test` pasa completo.
+- [x] `npm run types:check` termina sin errores.
+- [x] `npm run build` termina sin errores y `public/build/manifest.json` está actualizado.
+- [x] Ninguna página hace peticiones a `fonts.googleapis.com`, `fonts.bunny.net` ni se usa la fuente Instrument Sans.
+- [x] El texto de los títulos se renderiza con Poppins y el cuerpo con Montserrat (verificable con `getComputedStyle`).
+- [x] El botón primario tiene fondo `rgb(23, 146, 187)` y cambia a `rgb(19, 128, 165)` en hover.
+- [x] `GET /` responde 200 sin sesión y muestra "Firma y envía documentos en minutos.", "Cómo funciona" y "Funciones".
+- [x] Los botones "Iniciar sesión" y "Empezar gratis" de la landing llevan a `/login` y `/register`.
+- [x] Registrar un usuario nuevo con nombre, correo y contraseña redirige a `/documents` sin pedir verificación de correo.
+- [x] El formulario de registro no tiene campo "Empresa".
+- [x] El panel azul marino con los 3 pasos aparece en `/login` y `/register` a 1280 px de ancho y no aparece a 375 px.
+- [x] Cerrar sesión desde el sidebar lleva a `/` y `GET /documents` sin sesión redirige a `/login`.
+- [x] `GET /dashboard` con sesión redirige a `/documents`.
+- [x] `/documents` muestra 4 filas con los nombres, estados y fechas de la tabla del Data model.
+- [x] Los contadores de filtros muestran Todos 4, Borradores 2, Pendientes 1 y Completados 1, y cada filtro deja solo las filas de su estado.
+- [x] Un filtro sin resultados muestra "No hay documentos en esta vista."
+- [x] Hacer clic en "Subir documento" o soltar un archivo en la zona muestra el aviso y no abre el selector de archivos ni envía peticiones al servidor.
+- [x] A 375 px de ancho `/`, `/login`, `/register` y `/documents` no tienen scroll horizontal, y `/documents` muestra tarjetas en lugar de tabla.
+- [x] `/settings/profile` y `/settings/security` cargan con el tema nuevo y siguen guardando cambios.
+- [x] La ruta `/settings/appearance` responde 404.
+- [x] `resources/js/pages/auth/VerifyEmail.vue` y `resources/js/pages/Dashboard.vue` ya no existen.
+- [x] `php artisan route:list` no muestra ninguna ruta con `passkey` y `grep -ri passkey app routes config resources/js/components resources/js/pages` no devuelve resultados.
+- [x] `/login`, `/user/confirm-password` y `/settings/security` no muestran ningún texto ni botón de passkey.
+- [x] `package.json` no contiene `@laravel/passkeys` ni `vue-input-otp`.
+- [x] `php artisan route:list` no muestra rutas `two-factor` y `/settings/security` solo ofrece cambiar la contraseña, sin sección de verificación en dos pasos.
+- [x] El HTML de cualquier página incluye `<link rel="icon" href="/img/icon.svg">`, y `GET /favicon.ico` y `GET /apple-touch-icon.png` responden 200 con la imagen del isotipo de Ravsign (no el logo de Laravel).
 
 ---
 
