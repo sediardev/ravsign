@@ -14,8 +14,8 @@ import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Inicia sesión',
-        description: 'Ingresa tu correo y contraseña para continuar.',
+        title: 'Log in',
+        description: 'Enter your email and password to continue.',
     },
 });
 
@@ -26,7 +26,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Iniciar sesión" />
+    <Head title="Log in" />
 
     <div v-if="status" class="text-sm font-medium text-green-600">
         {{ status }}
@@ -39,7 +39,7 @@ defineProps<{
         class="flex flex-col gap-[18px]"
     >
         <div class="grid gap-1.5">
-            <Label for="email">Correo electrónico</Label>
+            <Label for="email">Email</Label>
             <Input
                 id="email"
                 type="email"
@@ -48,21 +48,21 @@ defineProps<{
                 v-focus
                 :tabindex="1"
                 autocomplete="email"
-                placeholder="tu@empresa.com"
+                placeholder="you@company.com"
             />
             <InputError :message="errors.email" />
         </div>
 
         <div class="grid gap-1.5">
             <div class="flex items-center justify-between">
-                <Label for="password">Contraseña</Label>
+                <Label for="password">Password</Label>
                 <TextLink
                     v-if="canResetPassword"
                     :href="request()"
                     class="text-[13px]"
                     :tabindex="5"
                 >
-                    ¿Olvidaste tu contraseña?
+                    Forgot your password?
                 </TextLink>
             </div>
             <PasswordInput
@@ -71,14 +71,14 @@ defineProps<{
                 required
                 :tabindex="2"
                 autocomplete="current-password"
-                placeholder="Tu contraseña"
+                placeholder="Your password"
             />
             <InputError :message="errors.password" />
         </div>
 
         <Label for="remember" class="flex items-center gap-2.5 font-medium">
             <Checkbox id="remember" name="remember" :tabindex="3" />
-            <span>Recordarme</span>
+            <span>Remember me</span>
         </Label>
 
         <Button
@@ -90,12 +90,12 @@ defineProps<{
             data-test="login-button"
         >
             <Spinner v-if="processing" />
-            Iniciar sesión
+            Log in
         </Button>
 
         <p class="text-center text-sm text-muted-foreground">
-            ¿No tienes cuenta?
-            <TextLink :href="register()" :tabindex="6">Crea una</TextLink>
+            Don't have an account?
+            <TextLink :href="register()" :tabindex="6">Create one</TextLink>
         </p>
     </Form>
 </template>

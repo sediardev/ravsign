@@ -25,6 +25,7 @@ import type { ResizeResult } from '@/composables/useFieldResize';
 import { ApiError, api } from '@/lib/api';
 import { FIELD_LABELS, FIELD_SIZES, SIGNER_COLORS } from '@/lib/documents';
 import { index, send } from '@/routes/documents';
+import { privacy, terms } from '@/routes/legal';
 import {
     destroy as destroyField,
     store as storeField,
@@ -42,9 +43,9 @@ const props = defineProps<{
 }>();
 
 const statusLabels = {
-    borrador: 'Borrador',
-    pendiente: 'Pendiente de firma',
-    completado: 'Completado',
+    borrador: 'Draft',
+    pendiente: 'Pending signature',
+    completado: 'Completed',
 } as const;
 
 const signers = ref<Signer[]>([...props.document.signers]);
@@ -70,7 +71,7 @@ const selectedField = computed(
 const fieldsSummary = computed(() => {
     const count = fields.value.length;
 
-    return `${count} ${count === 1 ? 'campo' : 'campos'} en el documento`;
+    return `${count} ${count === 1 ? 'field' : 'fields'} in the document`;
 });
 const signersById = computed(
     () => new Map(signers.value.map((signer) => [signer.id, signer])),
@@ -83,7 +84,7 @@ const adding = ref(false);
 const subtitle = computed(() => {
     const count = signers.value.length;
 
-    return `${statusLabels[props.document.status]} · ${count} ${count === 1 ? 'firmante' : 'firmantes'}`;
+    return `${statusLabels[props.document.status]} · ${count} ${count === 1 ? 'signer' : 'signers'}`;
 });
 
 const { drag, start } = useFieldDrag({ zoom, scroller, onDrop: handleDrop });
@@ -126,7 +127,7 @@ async function commitFieldSize(result: ResizeResult): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.first()
-                : 'No se pudo cambiar el tamaño del campo.',
+                : 'Could not resize the field.',
         );
     } finally {
         resizeOriginal = null;
@@ -186,7 +187,7 @@ const movingFieldId = computed(() =>
 
 function startPaletteDrag(event: PointerEvent, type: FieldType): void {
     if (!activeSignerId.value) {
-        toast('Agrega un firmante primero');
+        toast('Add a signer first');
 
         return;
     }
@@ -251,7 +252,7 @@ async function handleDrop(drop: DropResult): Promise<void> {
             toast.error(
                 error instanceof ApiError
                     ? error.first()
-                    : 'No se pudo colocar el campo.',
+                    : 'Could not place the field.',
             );
         }
 
@@ -284,7 +285,7 @@ async function handleDrop(drop: DropResult): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.first()
-                : 'No se pudo mover el campo.',
+                : 'Could not move the field.',
         );
     }
 }
@@ -313,7 +314,7 @@ async function reassignField(signerId: unknown): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.first()
-                : 'No se pudo reasignar el campo.',
+                : 'Could not reassign the field.',
         );
     }
 }
@@ -342,7 +343,7 @@ async function resizeField(size: { width: number; height: number }): Promise<voi
         toast.error(
             error instanceof ApiError
                 ? error.first()
-                : 'No se pudo cambiar el tamaño del campo.',
+                : 'Could not resize the field.',
         );
     }
 }
@@ -366,7 +367,7 @@ async function deleteSelectedField(): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.first()
-                : 'No se pudo eliminar el campo.',
+                : 'Could not delete the field.',
         );
 
         return;
@@ -409,11 +410,11 @@ const sending = ref(false);
 /** Check what the server checks too, so the message shows without a round trip. */
 function sendProblem(): string | null {
     if (signers.value.length === 0) {
-        return 'Agrega un firmante primero';
+        return 'Add a signer first';
     }
 
     if (fields.value.length === 0) {
-        return 'Agrega al menos un campo al documento';
+        return 'Add at least one field to the document';
     }
 
     if (
@@ -421,7 +422,7 @@ function sendProblem(): string | null {
             (signer) => !fields.value.some((f) => f.signerId === signer.id),
         )
     ) {
-        return 'Cada firmante necesita al menos un campo';
+        return 'Every signer needs at least one field';
     }
 
     return null;
@@ -448,7 +449,7 @@ async function sendForSigning(): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.first('document')
-                : 'No se pudo enviar el documento.',
+                : 'Could not send the document.',
         );
         sending.value = false;
 
@@ -497,7 +498,7 @@ async function addSigner(): Promise<void> {
             toast.error(
                 error instanceof ApiError
                     ? error.message
-                    : 'No se pudo agregar el firmante.',
+                    : 'Could not add the signer.',
             );
         }
     } finally {
@@ -518,7 +519,7 @@ async function removeSigner(signer: Signer): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.message
-                : 'No se pudo quitar al firmante.',
+                : 'Could not remove the signer.',
         );
 
         return;
@@ -543,11 +544,11 @@ async function removeSigner(signer: Signer): Promise<void> {
             <Link
                 :href="index().url"
                 class="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"
-                aria-label="Documentos"
+                aria-label="Documents"
                 data-test="back-to-documents"
             >
                 <ArrowLeft class="size-4" />
-                <span class="hidden desk:inline">Documentos</span>
+                <span class="hidden desk:inline">Documents</span>
             </Link>
 
             <div class="min-w-0 flex-1">
@@ -573,14 +574,14 @@ async function removeSigner(signer: Signer): Promise<void> {
                         class="flex size-6 items-center justify-center rounded-full bg-primary text-xs text-white"
                         >1</span
                     >
-                    Preparar
+                    Prepare
                 </li>
                 <li class="flex items-center gap-2 text-muted-foreground">
                     <span
                         class="flex size-6 items-center justify-center rounded-full bg-[#eef0f3] text-xs"
                         >2</span
                     >
-                    Firmar
+                    Sign
                 </li>
             </ol>
 
@@ -591,7 +592,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                 data-test="send-button"
                 @click="sendForSigning"
             >
-                {{ sending ? 'Enviando…' : 'Enviar para firma' }}
+                {{ sending ? 'Sending…' : 'Send for signature' }}
             </Button>
         </header>
 
@@ -602,7 +603,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                 data-test="signers-panel"
             >
                 <section v-if="editable" class="mb-5" data-test="palette">
-                    <h2 class="mb-3 text-sm font-semibold">Campos</h2>
+                    <h2 class="mb-3 text-sm font-semibold">Fields</h2>
                     <div
                         role="button"
                         tabindex="0"
@@ -617,10 +618,10 @@ async function removeSigner(signer: Signer): Promise<void> {
                         </span>
                         <span class="min-w-0">
                             <span class="block text-sm font-semibold"
-                                >Firma</span
+                                >Signature</span
                             >
                             <span class="block text-xs text-muted-foreground"
-                                >Arrástrala al documento</span
+                                >Drag it onto the document</span
                             >
                         </span>
                     </div>
@@ -641,7 +642,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                     @remove="deleteSelectedField"
                 />
 
-                <h2 class="mb-3 text-sm font-semibold">Firmantes</h2>
+                <h2 class="mb-3 text-sm font-semibold">Signers</h2>
 
                 <SignersPanel
                     v-model:form="form"
@@ -710,7 +711,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                     variant="ghost"
                     size="icon"
                     class="size-8 rounded-full"
-                    aria-label="Alejar"
+                    aria-label="Zoom out"
                     :disabled="!canZoomOut"
                     data-test="zoom-out"
                     @click="zoomOut"
@@ -720,7 +721,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                 <button
                     type="button"
                     class="min-w-[3.5ch] px-1 text-center text-xs font-semibold text-muted-foreground tabular-nums hover:text-foreground"
-                    aria-label="Restablecer zoom"
+                    aria-label="Reset zoom"
                     data-test="zoom-reset"
                     @click="resetZoom"
                 >
@@ -731,13 +732,26 @@ async function removeSigner(signer: Signer): Promise<void> {
                     variant="ghost"
                     size="icon"
                     class="size-8 rounded-full"
-                    aria-label="Acercar"
+                    aria-label="Zoom in"
                     :disabled="!canZoomIn"
                     data-test="zoom-in"
                     @click="zoomIn"
                 >
                     <ZoomIn class="size-4" />
                 </Button>
+            </div>
+
+            <div
+                v-if="!isMobile"
+                class="absolute bottom-2 left-6 z-20 flex items-center gap-2 text-xs text-muted-foreground"
+            >
+                <Link :href="terms()" class="hover:text-foreground"
+                    >Terms</Link
+                >
+                <span>·</span>
+                <Link :href="privacy()" class="hover:text-foreground"
+                    >Privacy</Link
+                >
             </div>
         </div>
 
@@ -773,9 +787,11 @@ async function removeSigner(signer: Signer): Promise<void> {
                     @pointerdown="startPaletteDrag($event, 'firma')"
                 >
                     <PenLine class="size-4 shrink-0 text-primary" />
-                    <span class="truncate text-sm font-semibold">Firma</span>
+                    <span class="truncate text-sm font-semibold"
+                        >Signature</span
+                    >
                     <span class="truncate text-xs text-muted-foreground"
-                        >Arrástrala</span
+                        >Drag it</span
                     >
                 </div>
 
@@ -787,7 +803,7 @@ async function removeSigner(signer: Signer): Promise<void> {
                     @click="sheetOpen = true"
                 >
                     <Users class="size-4" />
-                    Firmantes ({{ signers.length }})
+                    Signers ({{ signers.length }})
                 </Button>
             </div>
         </div>
@@ -800,10 +816,10 @@ async function removeSigner(signer: Signer): Promise<void> {
                 data-test="signers-sheet"
             >
                 <SheetHeader class="p-0">
-                    <SheetTitle>Firmantes</SheetTitle>
+                    <SheetTitle>Signers</SheetTitle>
                     <SheetDescription
-                        >Elige a quién asignar los campos
-                        nuevos.</SheetDescription
+                        >Choose who to assign new fields
+                        to.</SheetDescription
                     >
                 </SheetHeader>
 

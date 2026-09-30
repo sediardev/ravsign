@@ -30,14 +30,14 @@ const initial = computed(() =>
             :href="login()"
             class="text-sm font-semibold text-primary"
         >
-            Iniciar sesión
+            Log in
         </Link>
         <DropdownMenu v-else>
             <DropdownMenuTrigger as-child>
                 <button
                     type="button"
                     class="size-[38px] rounded-full bg-foreground text-sm font-bold text-white outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                    :aria-label="`Cuenta de ${user.name}`"
+                    :aria-label="`${user.name}'s account`"
                     data-test="mobile-menu-button"
                 >
                     {{ initial }}

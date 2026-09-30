@@ -35,7 +35,7 @@ const siglasPlaceholder = computed(() => {
         .map((word) => word[0].toUpperCase())
         .join('');
 
-    return initials || 'Siglas';
+    return initials || 'Initials';
 });
 </script>
 
@@ -82,7 +82,7 @@ const siglasPlaceholder = computed(() => {
                     v-if="editable"
                     type="button"
                     class="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-[#eef0f3] hover:text-foreground"
-                    :aria-label="`Quitar a ${signer.name}`"
+                    :aria-label="`Remove ${signer.name}`"
                     data-test="remove-signer"
                     @click="emit('remove', signer)"
                 >
@@ -95,7 +95,7 @@ const siglasPlaceholder = computed(() => {
             v-if="signers.length === 0"
             class="py-2 text-sm text-muted-foreground"
         >
-            Todavía no hay firmantes.
+            No signers yet.
         </p>
 
         <form
@@ -104,16 +104,16 @@ const siglasPlaceholder = computed(() => {
             data-test="add-signer-form"
             @submit.prevent="emit('add')"
         >
-            <h3 class="text-sm font-semibold">Agregar firmante</h3>
+            <h3 class="text-sm font-semibold">Add signer</h3>
 
             <div class="flex flex-col gap-1.5">
-                <Label for="signer-name">Nombre</Label>
+                <Label for="signer-name">Name</Label>
                 <Input
                     id="signer-name"
                     v-model="form.name"
                     class="h-10"
                     autocomplete="off"
-                    placeholder="Nombre completo"
+                    placeholder="Full name"
                     :aria-invalid="!!errors.name"
                 />
                 <p v-if="errors.name" class="text-xs text-destructive">
@@ -122,14 +122,14 @@ const siglasPlaceholder = computed(() => {
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <Label for="signer-email">Correo</Label>
+                <Label for="signer-email">Email</Label>
                 <Input
                     id="signer-email"
                     v-model="form.email"
                     type="email"
                     class="h-10"
                     autocomplete="off"
-                    placeholder="correo@ejemplo.com"
+                    placeholder="email@example.com"
                     :aria-invalid="!!errors.email"
                 />
                 <p v-if="errors.email" class="text-xs text-destructive">
@@ -138,7 +138,7 @@ const siglasPlaceholder = computed(() => {
             </div>
 
             <div class="flex flex-col gap-1.5">
-                <Label for="signer-siglas">Siglas</Label>
+                <Label for="signer-siglas">Initials</Label>
                 <Input
                     id="signer-siglas"
                     v-model="form.siglas"
@@ -154,7 +154,7 @@ const siglasPlaceholder = computed(() => {
             </div>
 
             <Button type="submit" size="sm" :disabled="adding">
-                {{ adding ? 'Agregando…' : 'Agregar' }}
+                {{ adding ? 'Adding…' : 'Add' }}
             </Button>
         </form>
 
@@ -162,14 +162,15 @@ const siglasPlaceholder = computed(() => {
             v-else-if="editable"
             class="mt-4 border-t border-border pt-4 text-xs text-muted-foreground"
         >
-            Un documento admite hasta {{ SIGNER_COLORS.length }} firmantes.
+            A document allows up to {{ SIGNER_COLORS.length }} signers.
         </p>
 
         <p
             v-else
             class="mt-4 border-t border-border pt-4 text-xs text-muted-foreground"
         >
-            Este documento ya se envió a firma y no se puede modificar.
+            This document was already sent for signature and can't be
+            modified.
         </p>
     </div>
 </template>

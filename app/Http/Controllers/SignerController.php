@@ -53,7 +53,7 @@ class SignerController extends Controller
         abort_unless($document->status === DocumentStatus::Pendiente, 403);
 
         if ($signer->signed_at !== null) {
-            throw ValidationException::withMessages(['signer' => 'Este firmante ya firmó.']);
+            throw ValidationException::withMessages(['signer' => 'This signer already signed.']);
         }
 
         Notification::route('mail', $signer->email)->notify(new SignerInviteNotification($signer));

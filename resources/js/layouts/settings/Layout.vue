@@ -10,11 +10,11 @@ import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Perfil',
+        title: 'Profile',
         href: editProfile(),
     },
     {
-        title: 'Seguridad',
+        title: 'Security',
         href: editSecurity(),
     },
 ];
@@ -27,15 +27,15 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
         class="px-[clamp(16px,4vw,40px)] py-[clamp(16px,4vw,32px)]"
     >
         <Heading
-            title="Ajustes"
-            description="Administra tu perfil y la seguridad de tu cuenta"
+            title="Settings"
+            description="Manage your profile and account security"
         />
 
         <div class="flex flex-col lg:flex-row lg:space-x-12">
             <aside class="w-full max-w-xl lg:w-48">
                 <nav
                     class="flex flex-col space-y-1 space-x-0"
-                    aria-label="Ajustes"
+                    aria-label="Settings"
                 >
                     <Link
                         v-for="item in sidebarNavItems"

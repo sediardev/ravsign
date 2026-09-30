@@ -36,8 +36,8 @@ class SignFieldRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required' => 'Dibuja o sube tu firma primero.',
-            'image.max' => 'La imagen de la firma es demasiado pesada.',
+            'image.required' => 'Draw or upload your signature first.',
+            'image.max' => 'The signature image is too large.',
         ];
     }
 
@@ -55,7 +55,7 @@ class SignFieldRequest extends FormRequest
                 $png = app(SignatureImage::class)->fromDataUrl((string) $this->input('image'));
 
                 if ($png === null) {
-                    $validator->errors()->add('image', 'La firma debe ser una imagen PNG o JPG de hasta 1 MB.');
+                    $validator->errors()->add('image', 'The signature must be a PNG or JPG image up to 1 MB.');
 
                     return;
                 }

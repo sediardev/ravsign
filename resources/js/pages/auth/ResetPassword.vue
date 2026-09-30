@@ -11,8 +11,8 @@ import { update } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Restablece tu contraseña',
-        description: 'Ingresa tu nueva contraseña.',
+        title: 'Reset your password',
+        description: 'Enter your new password.',
     },
 });
 
@@ -26,7 +26,7 @@ const inputEmail = ref(props.email);
 </script>
 
 <template>
-    <Head title="Restablecer contraseña" />
+    <Head title="Reset Password" />
 
     <Form
         v-bind="update.form()"
@@ -36,7 +36,7 @@ const inputEmail = ref(props.email);
         class="flex flex-col gap-[18px]"
     >
         <div class="grid gap-1.5">
-            <Label for="email">Correo electrónico</Label>
+            <Label for="email">Email</Label>
             <Input
                 id="email"
                 type="email"
@@ -50,25 +50,25 @@ const inputEmail = ref(props.email);
         </div>
 
         <div class="grid gap-1.5">
-            <Label for="password">Nueva contraseña</Label>
+            <Label for="password">New password</Label>
             <PasswordInput
                 id="password"
                 name="password"
                 autocomplete="new-password"
                 autofocus
-                placeholder="Mínimo 8 caracteres"
+                placeholder="At least 8 characters"
                 :passwordrules="passwordRules"
             />
             <InputError :message="errors.password" />
         </div>
 
         <div class="grid gap-1.5">
-            <Label for="password_confirmation">Confirmar contraseña</Label>
+            <Label for="password_confirmation">Confirm password</Label>
             <PasswordInput
                 id="password_confirmation"
                 name="password_confirmation"
                 autocomplete="new-password"
-                placeholder="Repite tu contraseña"
+                placeholder="Repeat your password"
                 :passwordrules="passwordRules"
             />
             <InputError :message="errors.password_confirmation" />
@@ -82,7 +82,7 @@ const inputEmail = ref(props.email);
             data-test="reset-password-button"
         >
             <Spinner v-if="processing" />
-            Restablecer contraseña
+            Reset password
         </Button>
     </Form>
 </template>

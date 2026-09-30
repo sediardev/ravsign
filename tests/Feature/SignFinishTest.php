@@ -130,7 +130,7 @@ class SignFinishTest extends TestCase
         $this->finish($this->carlos)
             ->assertSessionHas('open_links', $this->document->uuid)
             ->assertSessionHas('inertia.flash_data.toast.type', 'success')
-            ->assertSessionHas('inertia.flash_data.toast.message', 'Tu firma quedó registrada. Falta que firmen los demás.');
+            ->assertSessionHas('inertia.flash_data.toast.message', 'Your signature was recorded. Waiting on the others to sign.');
     }
 
     public function test_after_finishing_the_owner_sees_the_links_open_but_no_links_generated_notice()
@@ -155,6 +155,6 @@ class SignFinishTest extends TestCase
 
         $this->finish($this->carlos)
             ->assertOk()
-            ->assertSessionHas('inertia.flash_data.toast.message', 'Documento completado por todos los firmantes.');
+            ->assertSessionHas('inertia.flash_data.toast.message', 'Document completed by all signers.');
     }
 }

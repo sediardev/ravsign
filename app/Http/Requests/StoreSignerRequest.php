@@ -34,10 +34,10 @@ class StoreSignerRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Escribe el nombre del firmante.',
-            'email.required' => 'Escribe el correo del firmante.',
-            'email.email' => 'Escribe un correo válido.',
-            'siglas.max' => 'Las siglas pueden tener hasta 4 caracteres.',
+            'name.required' => 'Enter the signer\'s name.',
+            'email.required' => 'Enter the signer\'s email.',
+            'email.email' => 'Enter a valid email.',
+            'siglas.max' => 'Initials can have up to 4 characters.',
         ];
     }
 
@@ -49,7 +49,7 @@ class StoreSignerRequest extends FormRequest
         return [
             function (Validator $validator) {
                 if ($this->document()->signers()->count() >= count(Signer::COLORS)) {
-                    $validator->errors()->add('name', 'Un documento admite hasta '.count(Signer::COLORS).' firmantes.');
+                    $validator->errors()->add('name', 'A document allows up to '.count(Signer::COLORS).' signers.');
                 }
             },
         ];

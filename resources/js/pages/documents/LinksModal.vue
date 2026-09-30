@@ -40,16 +40,16 @@ const statusChips: Record<
     SignLink['status'],
     { label: string; background: string; color: string }
 > = {
-    pendiente: { label: 'Pendiente', background: '#fdf1e2', color: '#9a5a12' },
-    firmado: { label: 'Firmado', background: '#e3f3f9', color: '#0f6d8e' },
+    pendiente: { label: 'Pending', background: '#fdf1e2', color: '#9a5a12' },
+    firmado: { label: 'Signed', background: '#e3f3f9', color: '#0f6d8e' },
 };
 
 async function copy(link: SignLink, signer: Signer): Promise<void> {
     try {
         await writeToClipboard(link.url);
-        toast.success(`Enlace de ${signer.name} copiado`);
+        toast.success(`${signer.name}'s link copied`);
     } catch {
-        toast.error('No se pudo copiar el enlace.');
+        toast.error('Could not copy the link.');
     }
 }
 
@@ -69,12 +69,12 @@ async function resend(signer: Signer): Promise<void> {
             'POST',
             resendInvite({ document: documentId, signer: signer.id }).url,
         );
-        toast.success(`Correo reenviado a ${signer.name}`);
+        toast.success(`Email resent to ${signer.name}`);
     } catch (error) {
         toast.error(
             error instanceof ApiError
                 ? error.first()
-                : 'No se pudo reenviar el correo.',
+                : 'Could not resend the email.',
         );
     } finally {
         resending.value.delete(signer.id);
@@ -123,10 +123,10 @@ function openLink(link: SignLink): void {
     <Dialog v-model:open="open">
         <DialogContent class="sm:max-w-2xl" data-test="links-modal">
             <DialogHeader>
-                <DialogTitle>Enlaces de firma</DialogTitle>
+                <DialogTitle>Signing Links</DialogTitle>
                 <DialogDescription>
-                    Comparte a cada firmante su enlace personal. Cada uno solo
-                    ve y firma sus propios campos.
+                    Share each signer their personal link. Everyone can only
+                    see and sign their own fields.
                 </DialogDescription>
             </DialogHeader>
 
@@ -178,7 +178,7 @@ function openLink(link: SignLink): void {
                             @click="copy(link, signer)"
                         >
                             <Copy class="size-4" />
-                            Copiar
+                            Copy
                         </Button>
                         <Button
                             type="button"
@@ -187,7 +187,7 @@ function openLink(link: SignLink): void {
                             @click="openLink(link)"
                         >
                             <ExternalLink class="size-4" />
-                            Abrir enlace
+                            Open link
                         </Button>
                         <Button
                             v-if="link.status === 'pendiente'"
@@ -199,7 +199,7 @@ function openLink(link: SignLink): void {
                             @click="resend(signer)"
                         >
                             <Mail class="size-4" />
-                            Reenviar correo
+                            Resend email
                         </Button>
                     </div>
                 </li>
@@ -209,7 +209,7 @@ function openLink(link: SignLink): void {
                 v-if="rows.length === 0"
                 class="py-4 text-center text-sm text-muted-foreground"
             >
-                Este documento todavía no tiene enlaces.
+                This document doesn't have any links yet.
             </p>
 
             <div
@@ -217,12 +217,13 @@ function openLink(link: SignLink): void {
                 class="flex flex-col gap-2 border-t border-border pt-4"
             >
                 <p class="text-xs text-muted-foreground">
-                    Todos firmaron. El PDF final lleva cada firma en su campo.
+                    Everyone signed. The final PDF carries each signature in
+                    its field.
                 </p>
                 <Button as-child data-test="download-signed">
                     <a :href="download(document.id).url" download>
                         <Download class="size-4" />
-                        Descargar PDF firmado
+                        Download signed PDF
                     </a>
                 </Button>
             </div>

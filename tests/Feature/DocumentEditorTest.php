@@ -185,7 +185,7 @@ class DocumentEditorTest extends TestCase
         $this->actingAs($this->user)
             ->postJson(route('signers.resend-invite', [$document, $signer]))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['signer' => 'Este firmante ya firmó.']);
+            ->assertJsonValidationErrors(['signer' => 'This signer already signed.']);
     }
 
     public function test_the_invite_cannot_be_resent_while_the_document_is_a_draft()

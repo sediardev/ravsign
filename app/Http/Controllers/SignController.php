@@ -154,8 +154,8 @@ class SignController extends Controller
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => $completed
-                ? 'Documento completado por todos los firmantes.'
-                : 'Tu firma quedó registrada. Falta que firmen los demás.',
+                ? 'Document completed by all signers.'
+                : 'Your signature was recorded. Waiting on the others to sign.',
         ]);
 
         return response()->json(['completed' => $completed]);
