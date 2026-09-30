@@ -12,10 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::query()->firstOrCreate(
+        $user = User::query()->firstOrCreate(
             ['email' => 'test@example.com'],
             ['name' => 'Test User', 'password' => 'password'],
         );
+
+        $user->forceFill(['email_verified_at' => now()])->save();
 
         $this->call(DocumentSeeder::class);
     }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('dashboard', '/documents')->name('dashboard');
 
     Route::get('documents', [DocumentController::class, 'index'])->name('documents.index');
@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::scopeBindings()->group(function () {
         Route::post('documents/{document}/signers', [SignerController::class, 'store'])->name('signers.store');
         Route::delete('documents/{document}/signers/{signer}', [SignerController::class, 'destroy'])->name('signers.destroy');
+        Route::post('documents/{document}/signers/{signer}/resend-invite', [SignerController::class, 'resendInvite'])->name('signers.resend-invite');
 
         Route::post('documents/{document}/fields', [FieldController::class, 'store'])->name('fields.store');
         Route::patch('documents/{document}/fields/{field}', [FieldController::class, 'update'])->name('fields.update');

@@ -7,11 +7,13 @@ use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Resources\DocumentResource;
 use App\Models\Document;
 use App\Models\Signer;
+use App\Notifications\SignerInviteNotification;
 use App\Services\SignedPdfBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -81,7 +83,24 @@ class DocumentController extends Controller
 
         $document->load(['signers', 'fields.signer']);
 
+        foreach ($document->signers as $signer) {
+            $this->sendSignerInvite($signer);
+        }
+
         return (new DocumentResource($document))->response();
+    }
+
+    /**
+     * Notify a signer of their signing link. A delivery failure is logged
+     * but never blocks sending the document or the rest of the signers.
+     */
+    private function sendSignerInvite(Signer $signer): void
+    {
+        try {
+            Notification::route('mail', $signer->email)->notify(new SignerInviteNotification($signer));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     /**

@@ -23,7 +23,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Crea la base de datos `ravsign` en MySQL y ajusta `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD` en `.env`. Luego:
+Crea la base de datos `ravsign` en MySQL y ajusta `DB_HOST`, `DB_PORT`, `DB_USERNAME` y `DB_PASSWORD` en `.env`. Para que el correo salga de verdad (confirmación de registro, restablecer contraseña y enlaces de firma), completa también `MAILGUN_DOMAIN` y `MAILGUN_SECRET` — ver [Correo](#correo). Luego:
 
 ```bash
 php artisan migrate
@@ -40,7 +40,7 @@ Para desarrollar con recarga de Vue, ejecuta `npm run dev` junto con `php artisa
 php artisan migrate:fresh --seed
 ```
 
-Crea el usuario `test@example.com` (contraseña `password`) con cuatro documentos de ejemplo: dos borradores, uno pendiente de firma y uno completado con su PDF firmado. Un usuario recién registrado empieza sin documentos y puede subir su primer PDF.
+Crea el usuario `test@example.com` (contraseña `password`, correo ya confirmado) con cuatro documentos de ejemplo: dos borradores, uno pendiente de firma y uno completado con su PDF firmado. Un usuario recién registrado empieza sin documentos, debe confirmar su correo antes de entrar a Documentos, y luego puede subir su primer PDF.
 
 El PDF de ejemplo (`public/samples/acuerdo-servicios.pdf`) se genera con `php artisan app:make-sample-pdf`; ya está commiteado y el seeder lo usa.
 
@@ -48,17 +48,37 @@ El PDF de ejemplo (`public/samples/acuerdo-servicios.pdf`) se genera con `php ar
 
 ## Cómo funciona
 
-1. La persona sube un PDF en **Documentos** (máx. 10 MB y 50 páginas). Queda como *borrador*.
-2. En el editor agrega firmantes (hasta 4) y arrastra campos de firma sobre las páginas. Los campos se colocan en una rejilla de 8 puntos y se guardan como porcentaje de la página.
-3. **Enviar para firma** genera un enlace por firmante y pasa el documento a *pendiente de firma*.
-4. Cada firmante abre su enlace `/sign/{token}` (sin cuenta), firma sus campos dibujando o subiendo una imagen y pulsa **Finalizar firma**.
-5. Cuando firma el último, el documento pasa a *completado* y se genera el PDF firmado, que el dueño descarga desde el modal de enlaces.
+1. La persona se registra y confirma su correo (correo de verificación, ver [Correo](#correo)); sin confirmar no puede entrar a Documentos.
+2. Sube un PDF en **Documentos** (máx. 10 MB y 50 páginas). Queda como *borrador*.
+3. En el editor agrega firmantes (hasta 4) y arrastra campos de firma sobre las páginas. Los campos se colocan en una rejilla de 8 puntos y se guardan como porcentaje de la página.
+4. **Enviar para firma** genera un enlace por firmante, le envía un correo con un botón "Confirmar y firmar" a cada uno, y pasa el documento a *pendiente de firma*. Los enlaces también se pueden copiar a mano o reenviar por correo desde el modal de enlaces.
+5. Cada firmante abre su enlace `/sign/{token}` (sin cuenta), firma sus campos dibujando o subiendo una imagen y pulsa **Finalizar firma**.
+6. Cuando firma el último, el documento pasa a *completado* y se genera el PDF firmado, que el dueño descarga desde el modal de enlaces.
 
 Los archivos van en el disco privado `storage/app/private`: `documents/` (originales), `signatures/` (firmas PNG) y `signed/` (PDF firmados). Para cambiar a S3 u otro disco haría falta ajustar `FILESYSTEM_DISK`; esa migración no está hecha.
 
+## Correo
+
+El correo lo envía [Mailgun](https://www.mailgun.com/) (`symfony/mailgun-mailer`). En `.env`:
+
+```
+MAIL_MAILER=mailgun
+MAILGUN_DOMAIN=tu-dominio-verificado.com
+MAILGUN_SECRET=key-...
+MAILGUN_ENDPOINT=api.mailgun.net   # o api.eu.mailgun.net si el dominio es de la región UE
+```
+
+`MAILGUN_DOMAIN` y `MAILGUN_SECRET` salen del panel de Mailgun: **Sending → Domain settings** (el dominio verificado) y **API Keys** (la Private API key). Sin estas variables el envío falla; en local puedes volver a `MAIL_MAILER=log` para no depender de Mailgun mientras desarrollas.
+
+Se envían tres correos, todos con `MailMessage` sobre el layout de correo de Laravel (`resources/views/vendor/mail/`, con el logo y los colores de Ravsign, sin plantillas propias por correo):
+
+- **Confirmación de registro**: se envía al registrarse. Sin confirmar, `/documents` redirige a la pantalla de verificación, que tiene un botón para reenviarlo.
+- **Restablecer contraseña**: se envía desde "¿Olvidaste tu contraseña?".
+- **Invitación a firmar**: se envía a cada firmante al pulsar "Enviar para firma", con un botón "Confirmar y firmar" hacia su enlace. Si el envío a un firmante falla, no bloquea el envío del documento ni al resto de firmantes (queda en `storage/logs/laravel.log`); desde el modal de enlaces se puede reenviar a mano con "Reenviar correo".
+
 ## Límites conocidos
 
-- Los enlaces de firma no caducan ni se pueden revocar, y no se envían por correo: se copian a mano.
+- Los enlaces de firma no caducan ni se pueden revocar.
 - La versión libre de FPDI solo lee PDF hasta la versión 1.4; un PDF más moderno se rechaza al subirlo con un mensaje claro.
 - Las páginas con rotación (`/Rotate`) no están cubiertas al estampar las firmas.
 - Un firmante sin cuenta que pulsa **Salir** llega a `/documents`, que lo manda a iniciar sesión.
@@ -66,7 +86,7 @@ Los archivos van en el disco privado `storage/app/private`: `documents/` (origin
 ## Tests
 
 ```bash
-php artisan test        # 115 tests, incluido el flujo completo de firma
+php artisan test        # 127 tests, incluido el flujo completo de firma
 npm run types:check
 ```
 
@@ -109,7 +129,7 @@ Edita `.env` en el servidor con `APP_ENV=production`, `APP_DEBUG=false`, `APP_UR
 
 ## Configuración por defecto
 
-- Sesión y caché en `database`, colas en `sync` (sin workers), correo en `log`.
+- Sesión y caché en `database`, colas en `sync` (sin workers), correo con Mailgun (ver [Correo](#correo)).
 - Los documentos se guardan en el disco privado `storage/app/private` y se sirven mediante controlador, nunca por URL directa.
 - `vendor/`, `node_modules/` y `.env` no se suben a git.
 
