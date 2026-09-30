@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { ChevronsUpDown } from '@lucide/vue';
 import { computed } from 'vue';
 import {
@@ -7,49 +7,41 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar,
-} from '@/components/ui/sidebar';
 import UserInfo from '@/components/UserInfo.vue';
 import UserMenuContent from '@/components/UserMenuContent.vue';
+import { login } from '@/routes';
 
 const page = usePage();
-const user = computed(() => page.props.auth.user);
-const { isMobile, state } = useSidebar();
+// The user is null while the web routes run without the `auth` middleware.
+const user = computed(() => page.props.auth.user as typeof page.props.auth.user | null);
 </script>
 
 <template>
-    <SidebarMenu>
-        <SidebarMenuItem>
-            <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                    <SidebarMenuButton
-                        size="lg"
-                        class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        data-test="sidebar-menu-button"
-                    >
-                        <UserInfo :user="user" />
-                        <ChevronsUpDown class="ml-auto size-4" />
-                    </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    class="w-(--reka-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                    :side="
-                        isMobile
-                            ? 'bottom'
-                            : state === 'collapsed'
-                              ? 'left'
-                              : 'bottom'
-                    "
-                    align="end"
-                    :side-offset="4"
-                >
-                    <UserMenuContent :user="user" />
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </SidebarMenuItem>
-    </SidebarMenu>
+    <Link
+        v-if="!user"
+        :href="login()"
+        class="block rounded-lg px-3 py-[11px] text-sm font-semibold text-primary hover:bg-accent"
+    >
+        Iniciar sesión
+    </Link>
+    <DropdownMenu v-else>
+        <DropdownMenuTrigger as-child>
+            <button
+                type="button"
+                class="flex w-full items-center gap-2.5 rounded-lg px-2 py-3 text-left outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent"
+                data-test="sidebar-menu-button"
+            >
+                <UserInfo :user="user" />
+                <ChevronsUpDown class="size-4 shrink-0 text-muted-foreground" />
+            </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+            class="w-(--reka-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            side="top"
+            align="start"
+            :side-offset="4"
+        >
+            <UserMenuContent :user="user" />
+        </DropdownMenuContent>
+    </DropdownMenu>
 </template>

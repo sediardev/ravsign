@@ -16,99 +16,114 @@ defineProps<{
 
 defineOptions({
     layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
+        title: 'Crea tu cuenta',
+        description: 'Empieza a enviar documentos para firma.',
     },
 });
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head title="Crear cuenta" />
 
     <Form
         v-bind="store.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+        class="flex flex-col gap-[18px]"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="name">Name</Label>
-                <Input
-                    id="name"
-                    type="text"
-                    required
-                    v-focus
-                    :tabindex="1"
-                    autocomplete="name"
-                    name="name"
-                    placeholder="Full name"
-                />
-                <InputError :message="errors.name" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    required
-                    :tabindex="2"
-                    autocomplete="email"
-                    name="email"
-                    placeholder="email@example.com"
-                />
-                <InputError :message="errors.email" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
-                <PasswordInput
-                    id="password"
-                    required
-                    :tabindex="3"
-                    autocomplete="new-password"
-                    name="password"
-                    placeholder="Password"
-                    :passwordrules="passwordRules"
-                />
-                <InputError :message="errors.password" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
-                <PasswordInput
-                    id="password_confirmation"
-                    required
-                    :tabindex="4"
-                    autocomplete="new-password"
-                    name="password_confirmation"
-                    placeholder="Confirm password"
-                    :passwordrules="passwordRules"
-                />
-                <InputError :message="errors.password_confirmation" />
-            </div>
-
-            <Button
-                type="submit"
-                class="mt-2 w-full"
-                tabindex="5"
-                :disabled="processing"
-                data-test="register-user-button"
-            >
-                <Spinner v-if="processing" />
-                Create account
-            </Button>
+        <div class="grid gap-1.5">
+            <Label for="name">Nombre completo</Label>
+            <Input
+                id="name"
+                type="text"
+                required
+                v-focus
+                :tabindex="1"
+                autocomplete="name"
+                name="name"
+            />
+            <InputError :message="errors.name" />
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Already have an account?
-            <TextLink
-                :href="login()"
-                class="underline underline-offset-4"
-                :tabindex="6"
-                >Log in</TextLink
-            >
+        <div class="grid gap-1.5">
+            <Label for="email">Correo electrónico</Label>
+            <Input
+                id="email"
+                type="email"
+                required
+                :tabindex="2"
+                autocomplete="email"
+                name="email"
+                placeholder="tu@empresa.com"
+            />
+            <InputError :message="errors.email" />
         </div>
+
+        <div class="grid gap-1.5">
+            <Label for="password">Contraseña</Label>
+            <PasswordInput
+                id="password"
+                required
+                :tabindex="3"
+                autocomplete="new-password"
+                name="password"
+                placeholder="Mínimo 8 caracteres"
+                :passwordrules="passwordRules"
+            />
+            <InputError :message="errors.password" />
+        </div>
+
+        <div class="grid gap-1.5">
+            <Label for="password_confirmation">Confirmar contraseña</Label>
+            <PasswordInput
+                id="password_confirmation"
+                required
+                :tabindex="4"
+                autocomplete="new-password"
+                name="password_confirmation"
+                placeholder="Repite tu contraseña"
+                :passwordrules="passwordRules"
+            />
+            <InputError :message="errors.password_confirmation" />
+        </div>
+
+        <label
+            class="flex items-start gap-2.5 text-[13px] leading-normal text-muted-foreground"
+        >
+            <input
+                type="checkbox"
+                required
+                class="mt-[3px] accent-primary"
+                :tabindex="5"
+            />
+            <span>
+                Acepto los
+                <a href="#" class="font-semibold text-primary">
+                    Términos de servicio
+                </a>
+                y la
+                <a href="#" class="font-semibold text-primary">
+                    Política de privacidad
+                </a>
+                .
+            </span>
+        </label>
+
+        <Button
+            type="submit"
+            size="lg"
+            class="mt-1 w-full"
+            :tabindex="6"
+            :disabled="processing"
+            data-test="register-user-button"
+        >
+            <Spinner v-if="processing" />
+            Crear cuenta
+        </Button>
+
+        <p class="text-center text-sm text-muted-foreground">
+            ¿Ya tienes cuenta?
+            <TextLink :href="login()" :tabindex="7">Inicia sesión</TextLink>
+        </p>
     </Form>
 </template>

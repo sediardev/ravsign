@@ -11,8 +11,9 @@ import { email } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Forgot password',
-        description: 'Enter your email to receive a password reset link',
+        title: 'Recupera tu contraseña',
+        description:
+            'Ingresa tu correo y te enviaremos un enlace para restablecerla.',
     },
 });
 
@@ -22,45 +23,43 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Forgot password" />
+    <Head title="Recuperar contraseña" />
 
-    <div
-        v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
-    >
+    <div v-if="status" class="text-sm font-medium text-green-600">
         {{ status }}
     </div>
 
-    <div class="space-y-6">
-        <Form v-bind="email.form()" v-slot="{ errors, processing }">
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    autocomplete="off"
-                    v-focus
-                    placeholder="email@example.com"
-                />
-                <InputError :message="errors.email" />
-            </div>
-
-            <div class="my-6 flex items-center justify-start">
-                <Button
-                    class="w-full"
-                    :disabled="processing"
-                    data-test="email-password-reset-link-button"
-                >
-                    <Spinner v-if="processing" />
-                    Email password reset link
-                </Button>
-            </div>
-        </Form>
-
-        <div class="space-x-1 text-center text-sm text-muted-foreground">
-            <span>Or, return to</span>
-            <TextLink :href="login()">log in</TextLink>
+    <Form
+        v-bind="email.form()"
+        v-slot="{ errors, processing }"
+        class="flex flex-col gap-[18px]"
+    >
+        <div class="grid gap-1.5">
+            <Label for="email">Correo electrónico</Label>
+            <Input
+                id="email"
+                type="email"
+                name="email"
+                autocomplete="off"
+                v-focus
+                placeholder="tu@empresa.com"
+            />
+            <InputError :message="errors.email" />
         </div>
-    </div>
+
+        <Button
+            size="lg"
+            class="mt-1 w-full"
+            :disabled="processing"
+            data-test="email-password-reset-link-button"
+        >
+            <Spinner v-if="processing" />
+            Enviar enlace de recuperación
+        </Button>
+
+        <p class="text-center text-sm text-muted-foreground">
+            ¿La recordaste?
+            <TextLink :href="login()">Inicia sesión</TextLink>
+        </p>
+    </Form>
 </template>
