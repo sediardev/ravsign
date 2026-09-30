@@ -1,6 +1,6 @@
 # SPEC 01 — Instalación base de Laravel 13 con Vue para RavSign
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** ninguna
 > **Date:** 2026-09-29
 > **Objective:** Dejar instalado y funcionando en local y en hosting compartido un proyecto Laravel 13 con Vue (Inertia), login, MySQL y las dependencias de PDF y firma, sin ninguna lógica de documentos todavía.
