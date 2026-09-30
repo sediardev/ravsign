@@ -27,11 +27,11 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
         ], false));
 
         return (new MailMessage)
-            ->subject('Restablece tu contraseña de Ravsign')
-            ->greeting('¡Hola!')
-            ->line('Recibimos una solicitud para restablecer la contraseña de tu cuenta de Ravsign.')
-            ->action('Restablecer contraseña', $url)
-            ->line('Este enlace expira en 60 minutos.')
-            ->line('Si no solicitaste este cambio, puedes ignorar este correo.');
+            ->subject('Reset your Ravsign password')
+            ->greeting('Hello!')
+            ->line('We received a request to reset the password for your Ravsign account.')
+            ->action('Reset password', $url)
+            ->line('This link expires in 60 minutes.')
+            ->line('If you did not request this change, you can ignore this email.');
     }
 }

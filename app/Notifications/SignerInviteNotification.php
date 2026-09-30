@@ -27,10 +27,10 @@ class SignerInviteNotification extends Notification implements ShouldQueue
         $url = route('sign.show', ['token' => $this->signer->token]);
 
         return (new MailMessage)
-            ->subject("Te invitaron a firmar «{$document->name}»")
-            ->greeting("Hola, {$this->signer->name}")
-            ->line("{$sender->name} te invitó a firmar el documento «{$document->name}» en Ravsign.")
-            ->action('Confirmar y firmar', $url)
-            ->line('Este enlace es personal e intransferible: no lo compartas con nadie más.');
+            ->subject("You were invited to sign \"{$document->name}\"")
+            ->greeting("Hello, {$this->signer->name}")
+            ->line("{$sender->name} invited you to sign the document \"{$document->name}\" on Ravsign.")
+            ->action('Confirm and sign', $url)
+            ->line('This link is personal and non-transferable: do not share it with anyone else.');
     }
 }

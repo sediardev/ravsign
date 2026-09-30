@@ -5,6 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { home } from '@/routes';
 import { index as documents } from '@/routes/documents';
+import { privacy, terms } from '@/routes/legal';
 
 const { isCurrentOrParentUrl } = useCurrentUrl();
 </script>
@@ -17,7 +18,7 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
             <AppLogo />
         </Link>
 
-        <nav class="flex flex-col gap-1" aria-label="Principal">
+        <nav class="flex flex-col gap-1" aria-label="Main">
             <Link
                 :href="documents()"
                 class="rounded-lg px-3 py-[11px] text-sm transition-colors"
@@ -27,12 +28,23 @@ const { isCurrentOrParentUrl } = useCurrentUrl();
                         : 'font-medium text-muted-foreground hover:bg-accent/60 hover:text-foreground'
                 "
             >
-                Documentos
+                Documents
             </Link>
         </nav>
 
-        <div class="mt-auto border-t border-border pt-3">
+        <div class="mt-auto flex flex-col gap-3 border-t border-border pt-3">
             <NavUser />
+            <div
+                class="flex items-center gap-2 px-3 text-xs text-muted-foreground"
+            >
+                <Link :href="terms()" class="hover:text-foreground"
+                    >Terms</Link
+                >
+                <span>·</span>
+                <Link :href="privacy()" class="hover:text-foreground"
+                    >Privacy</Link
+                >
+            </div>
         </div>
     </aside>
 </template>

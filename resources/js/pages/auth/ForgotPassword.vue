@@ -11,9 +11,9 @@ import { email } from '@/routes/password';
 
 defineOptions({
     layout: {
-        title: 'Recupera tu contraseña',
+        title: 'Recover your password',
         description:
-            'Ingresa tu correo y te enviaremos un enlace para restablecerla.',
+            "Enter your email and we'll send you a link to reset it.",
     },
 });
 
@@ -23,7 +23,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Recuperar contraseña" />
+    <Head title="Recover Password" />
 
     <div v-if="status" class="text-sm font-medium text-green-600">
         {{ status }}
@@ -35,14 +35,14 @@ defineProps<{
         class="flex flex-col gap-[18px]"
     >
         <div class="grid gap-1.5">
-            <Label for="email">Correo electrónico</Label>
+            <Label for="email">Email</Label>
             <Input
                 id="email"
                 type="email"
                 name="email"
                 autocomplete="off"
                 v-focus
-                placeholder="tu@empresa.com"
+                placeholder="you@company.com"
             />
             <InputError :message="errors.email" />
         </div>
@@ -54,12 +54,12 @@ defineProps<{
             data-test="email-password-reset-link-button"
         >
             <Spinner v-if="processing" />
-            Enviar enlace de recuperación
+            Send recovery link
         </Button>
 
         <p class="text-center text-sm text-muted-foreground">
-            ¿La recordaste?
-            <TextLink :href="login()">Inicia sesión</TextLink>
+            Remembered it?
+            <TextLink :href="login()">Log in</TextLink>
         </p>
     </Form>
 </template>

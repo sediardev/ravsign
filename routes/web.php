@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
+Route::inertia('terms', 'legal/Show', ['type' => 'terms'])->name('legal.terms');
+Route::inertia('privacy', 'legal/Show', ['type' => 'privacy'])->name('legal.privacy');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('dashboard', '/documents')->name('dashboard');
 

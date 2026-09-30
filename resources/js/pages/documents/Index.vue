@@ -21,24 +21,24 @@ const statusChips: Record<
     DocumentStatus,
     { label: string; background: string; color: string }
 > = {
-    borrador: { label: 'Borrador', background: '#eef0f3', color: '#4b515a' },
+    borrador: { label: 'Draft', background: '#eef0f3', color: '#4b515a' },
     pendiente: {
-        label: 'Pendiente de firma',
+        label: 'Pending signature',
         background: '#fdf1e2',
         color: '#9a5a12',
     },
     completado: {
-        label: 'Completado',
+        label: 'Completed',
         background: '#e3f3f9',
         color: '#0f6d8e',
     },
 };
 
 const filterDefinitions: { key: Filter; label: string }[] = [
-    { key: 'todos', label: 'Todos' },
-    { key: 'borrador', label: 'Borradores' },
-    { key: 'pendiente', label: 'Pendientes' },
-    { key: 'completado', label: 'Completados' },
+    { key: 'todos', label: 'All' },
+    { key: 'borrador', label: 'Drafts' },
+    { key: 'pendiente', label: 'Pending' },
+    { key: 'completado', label: 'Completed' },
 ];
 
 const activeFilter = ref<Filter>('todos');
@@ -108,7 +108,7 @@ onMounted(() => {
 
         if (props.linksGenerated) {
             toast.success(
-                `Enlaces generados para ${sent.links.length} ${sent.links.length === 1 ? 'firmante' : 'firmantes'}`,
+                `Links generated for ${sent.links.length} ${sent.links.length === 1 ? 'signer' : 'signers'}`,
             );
         }
     }
@@ -133,7 +133,7 @@ function upload(file: File | undefined): void {
         {
             forceFormData: true,
             onError: (errors) => {
-                toast.error(errors.file ?? 'No se pudo subir el documento.');
+                toast.error(errors.file ?? 'Could not upload the document.');
             },
             onFinish: () => {
                 uploading.value = false;
@@ -155,7 +155,7 @@ function onDrop(event: DragEvent): void {
 </script>
 
 <template>
-    <Head title="Documentos" />
+    <Head title="Documents" />
 
     <div
         class="flex flex-1 flex-col gap-[clamp(16px,3vw,24px)] px-[clamp(16px,4vw,40px)] py-[clamp(16px,4vw,32px)]"
@@ -164,7 +164,7 @@ function onDrop(event: DragEvent): void {
             <h1
                 class="text-[clamp(24px,5vw,28px)] font-semibold tracking-[-0.01em]"
             >
-                Documentos
+                Documents
             </h1>
             <Button
                 type="button"
@@ -172,7 +172,7 @@ function onDrop(event: DragEvent): void {
                 :disabled="uploading"
                 @click="openPicker"
             >
-                {{ uploading ? 'Subiendo…' : 'Subir documento' }}
+                {{ uploading ? 'Uploading…' : 'Upload document' }}
             </Button>
             <input
                 ref="fileInput"
@@ -201,13 +201,13 @@ function onDrop(event: DragEvent): void {
             @drop.prevent="onDrop"
         >
             <span class="hidden text-[15px] font-semibold desk:inline">
-                Arrastra un PDF aquí o haz clic para subirlo
+                Drag a PDF here or click to upload it
             </span>
             <span class="text-[15px] font-semibold desk:hidden">
-                Toca para subir un documento
+                Tap to upload a document
             </span>
             <span class="text-[13px] text-muted-foreground"
-                >Solo PDF, hasta 10 MB</span
+                >PDF only, up to 10 MB</span
             >
         </div>
 
@@ -240,10 +240,10 @@ function onDrop(event: DragEvent): void {
                 <div
                     class="grid grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_minmax(0,1.4fr)_minmax(0,0.9fr)] gap-4 border-b border-border px-5 py-3 text-xs font-semibold tracking-[0.05em] text-muted-foreground uppercase"
                 >
-                    <span>Documento</span>
-                    <span>Estado</span>
-                    <span>Firmantes</span>
-                    <span>Actualizado</span>
+                    <span>Document</span>
+                    <span>Status</span>
+                    <span>Signers</span>
+                    <span>Updated</span>
                 </div>
                 <div
                     v-for="row in rows"
@@ -328,7 +328,7 @@ function onDrop(event: DragEvent): void {
                 v-if="rows.length === 0"
                 class="p-10 text-center text-sm text-muted-foreground"
             >
-                No hay documentos en esta vista.
+                No documents in this view.
             </div>
         </div>
 

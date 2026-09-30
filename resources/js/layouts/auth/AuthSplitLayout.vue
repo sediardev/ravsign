@@ -9,14 +9,14 @@ defineProps<{
 }>();
 
 const steps = [
-    { number: '01', text: 'Carga tus PDF y previsualízalos.' },
+    { number: '01', text: 'Upload your PDFs and preview them.' },
     {
         number: '02',
-        text: 'Arrastra campos de firma y asígnalos a cada firmante.',
+        text: 'Drag signature fields and assign them to each signer.',
     },
     {
         number: '03',
-        text: 'Firma con un trazo o con una imagen de tu firma.',
+        text: 'Sign with a stroke or with an image of your signature.',
     },
 ];
 </script>
@@ -53,7 +53,7 @@ const steps = [
             <h2
                 class="max-w-[440px] text-4xl leading-[1.15] font-semibold tracking-[-0.02em] text-white"
             >
-                Sube, asigna y firma en un solo lugar.
+                Upload, assign, and sign in one place.
             </h2>
             <ol class="flex max-w-[420px] flex-col gap-5">
                 <li

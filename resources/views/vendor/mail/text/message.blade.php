@@ -21,7 +21,7 @@
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            © {{ date('Y') }} Ravsign. Todos los derechos reservados. https://ravsign.site
+            © {{ date('Y') }} Ravsign. All rights reserved. https://ravsign.site
         </x-mail::footer>
     </x-slot:footer>
 </x-mail::layout>

@@ -20,6 +20,7 @@ void createInertiaApp({
             case name === 'Welcome':
             case name === 'documents/Editor':
             case name === 'sign/Show':
+            case name === 'legal/Show':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;

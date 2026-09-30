@@ -37,11 +37,11 @@ class StoreDocumentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' => 'Selecciona un archivo PDF.',
-            'file.file' => 'No se pudo subir el archivo.',
-            'file.uploaded' => 'No se pudo subir el archivo. Comprueba que no supere los 10 MB.',
-            'file.mimetypes' => 'El archivo debe ser un PDF.',
-            'file.max' => 'El PDF no puede superar los 10 MB.',
+            'file.required' => 'Select a PDF file.',
+            'file.file' => 'Could not upload the file.',
+            'file.uploaded' => 'Could not upload the file. Make sure it is under 10 MB.',
+            'file.mimetypes' => 'The file must be a PDF.',
+            'file.max' => 'The PDF can\'t be larger than 10 MB.',
         ];
     }
 
@@ -61,13 +61,13 @@ class StoreDocumentRequest extends FormRequest
                 $pages = app(PdfInspector::class)->pageCount($file->getRealPath());
 
                 if ($pages === null || $pages < 1) {
-                    $validator->errors()->add('file', 'No se pudo leer el PDF. Prueba con otro archivo o guárdalo como PDF 1.4.');
+                    $validator->errors()->add('file', 'Could not read the PDF. Try another file or save it as PDF 1.4.');
 
                     return;
                 }
 
                 if ($pages > self::MAX_PAGES) {
-                    $validator->errors()->add('file', 'El PDF no puede tener más de '.self::MAX_PAGES.' páginas.');
+                    $validator->errors()->add('file', 'The PDF can\'t have more than '.self::MAX_PAGES.' pages.');
 
                     return;
                 }

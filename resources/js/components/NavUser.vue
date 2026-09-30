@@ -22,7 +22,7 @@ const user = computed(() => page.props.auth.user as typeof page.props.auth.user 
         :href="login()"
         class="block rounded-lg px-3 py-[11px] text-sm font-semibold text-primary hover:bg-accent"
     >
-        Iniciar sesión
+        Log in
     </Link>
     <DropdownMenu v-else>
         <DropdownMenuTrigger as-child>

@@ -14,15 +14,15 @@ const user = computed(() => page.props.auth.user);
 </script>
 
 <template>
-    <Head title="Perfil" />
+    <Head title="Profile" />
 
-    <h1 class="sr-only">Perfil</h1>
+    <h1 class="sr-only">Profile</h1>
 
     <div class="flex flex-col space-y-6">
         <Heading
             variant="small"
-            title="Perfil"
-            description="Actualiza tu nombre y tu correo electrónico"
+            title="Profile"
+            description="Update your name and email address"
         />
 
         <Form
@@ -31,7 +31,7 @@ const user = computed(() => page.props.auth.user);
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-1.5">
-                <Label for="name">Nombre completo</Label>
+                <Label for="name">Full name</Label>
                 <Input
                     id="name"
                     class="block w-full"
@@ -44,7 +44,7 @@ const user = computed(() => page.props.auth.user);
             </div>
 
             <div class="grid gap-1.5">
-                <Label for="email">Correo electrónico</Label>
+                <Label for="email">Email</Label>
                 <Input
                     id="email"
                     type="email"
@@ -53,14 +53,14 @@ const user = computed(() => page.props.auth.user);
                     :default-value="user.email"
                     required
                     autocomplete="username"
-                    placeholder="tu@empresa.com"
+                    placeholder="you@company.com"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="flex items-center gap-4">
                 <Button :disabled="processing" data-test="update-profile-button"
-                    >Guardar</Button
+                    >Save</Button
                 >
             </div>
         </Form>

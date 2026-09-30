@@ -54,10 +54,10 @@ export function clampFieldSize(input: {
 }
 
 export const FIELD_LABELS: Record<FieldType, string> = {
-    firma: 'Firma',
-    iniciales: 'Iniciales',
-    fecha: 'Fecha',
-    nombre: 'Nombre',
+    firma: 'Signature',
+    iniciales: 'Initials',
+    fecha: 'Date',
+    nombre: 'Name',
 };
 
 export type PageRect = {

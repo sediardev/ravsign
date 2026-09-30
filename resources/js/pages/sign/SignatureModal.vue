@@ -23,8 +23,8 @@ const open = defineModel<boolean>('open', { required: true });
 type Tab = 'draw' | 'upload';
 
 const tabs: { key: Tab; label: string }[] = [
-    { key: 'draw', label: 'Dibujar' },
-    { key: 'upload', label: 'Subir imagen' },
+    { key: 'draw', label: 'Draw' },
+    { key: 'upload', label: 'Upload image' },
 ];
 
 const tab = ref<Tab>('draw');
@@ -106,7 +106,7 @@ async function onFile(event: Event): Promise<void> {
         uploadError.value =
             error instanceof Error
                 ? error.message
-                : 'No se pudo leer la imagen.';
+                : 'Could not read the image.';
     }
 }
 
@@ -135,10 +135,10 @@ onBeforeUnmount(() => pad?.off());
     <Dialog v-model:open="open">
         <DialogContent class="sm:max-w-lg" data-test="signature-modal">
             <DialogHeader>
-                <DialogTitle>Adopta tu firma</DialogTitle>
+                <DialogTitle>Adopt your signature</DialogTitle>
                 <DialogDescription>
-                    Dibújala o sube una imagen. La usaremos en todos tus campos
-                    de firma.
+                    Draw it or upload an image. We'll use it in all your
+                    signature fields.
                 </DialogDescription>
             </DialogHeader>
 
@@ -177,7 +177,7 @@ onBeforeUnmount(() => pad?.off());
                     <span
                         v-if="!hasStroke"
                         class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted-foreground"
-                        >Firma aquí</span
+                        >Sign here</span
                     >
                 </div>
                 <div class="flex justify-end">
@@ -188,7 +188,7 @@ onBeforeUnmount(() => pad?.off());
                         data-test="clear-signature"
                         @click="clear"
                     >
-                        Limpiar
+                        Clear
                     </Button>
                 </div>
             </div>
@@ -211,21 +211,21 @@ onBeforeUnmount(() => pad?.off());
                     <template v-if="uploaded">
                         <img
                             :src="uploaded"
-                            alt="Vista previa de tu firma"
+                            alt="Preview of your signature"
                             class="min-h-0 flex-1 object-contain"
                             data-test="signature-preview"
                         />
                         <span class="text-xs text-muted-foreground"
-                            >Haz clic para cambiar la imagen</span
+                            >Click to change the image</span
                         >
                     </template>
                     <template v-else>
                         <ImagePlus class="size-7 text-muted-foreground" />
                         <span class="text-sm font-semibold"
-                            >Haz clic para subir una imagen</span
+                            >Click to upload an image</span
                         >
                         <span class="text-xs text-muted-foreground"
-                            >PNG o JPG con tu firma</span
+                            >PNG or JPG of your signature</span
                         >
                     </template>
                 </button>
@@ -239,9 +239,9 @@ onBeforeUnmount(() => pad?.off());
             </div>
 
             <p class="text-xs leading-relaxed text-muted-foreground">
-                Al pulsar «Adoptar y firmar» acepto que esta firma electrónica
-                es la representación de mi firma y que tiene validez en este
-                documento.
+                By clicking "Adopt and sign" I agree that this electronic
+                signature is the representation of my signature and is valid
+                on this document.
             </p>
 
             <DialogFooter class="gap-2">
@@ -251,7 +251,7 @@ onBeforeUnmount(() => pad?.off());
                     data-test="cancel-signature"
                     @click="open = false"
                 >
-                    Cancelar
+                    Cancel
                 </Button>
                 <Button
                     type="button"
@@ -259,7 +259,7 @@ onBeforeUnmount(() => pad?.off());
                     data-test="adopt-signature"
                     @click="adopt"
                 >
-                    Adoptar y firmar
+                    Adopt and sign
                 </Button>
             </DialogFooter>
         </DialogContent>

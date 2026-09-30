@@ -30,10 +30,10 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
         );
 
         return (new MailMessage)
-            ->subject('Confirma tu correo en Ravsign')
-            ->greeting('¡Hola!')
-            ->line('Gracias por registrarte en Ravsign. Confirma tu dirección de correo para empezar a firmar documentos.')
-            ->action('Confirmar correo', $url)
-            ->line('Si no creaste una cuenta en Ravsign, puedes ignorar este correo.');
+            ->subject('Confirm your email on Ravsign')
+            ->greeting('Hello!')
+            ->line('Thanks for signing up for Ravsign. Confirm your email address to start signing documents.')
+            ->action('Confirm email', $url)
+            ->line('If you did not create an account on Ravsign, you can ignore this email.');
     }
 }

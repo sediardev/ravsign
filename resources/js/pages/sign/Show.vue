@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { usePageZoom } from '@/composables/usePageZoom';
 import { ApiError, api } from '@/lib/api';
 import { index } from '@/routes/documents';
+import { privacy, terms } from '@/routes/legal';
 import { field as signFieldRoute, finish as finishRoute } from '@/routes/sign';
 import type { SignField, SigningDocument, SigningSigner } from '@/types';
 import SignatureModal from './SignatureModal.vue';
@@ -51,11 +52,11 @@ const signedCount = computed(
 /** What to tell the signer when there is nothing left for them to do. */
 const statusMessage = computed(() => {
     if (completed.value) {
-        return 'Documento completado por todos los firmantes.';
+        return 'Document completed by all signers.';
     }
 
     return signerSigned.value
-        ? 'Ya firmaste este documento. Falta que firmen los demás.'
+        ? 'You already signed this document. Waiting on the others to sign.'
         : null;
 });
 
@@ -73,7 +74,7 @@ async function finish(): Promise<void> {
     }
 
     if (ownFields.value.some((f) => f.value === null)) {
-        toast.error('Completa todos tus campos antes de finalizar');
+        toast.error('Complete all your fields before finishing');
 
         return;
     }
@@ -92,7 +93,7 @@ async function finish(): Promise<void> {
         toast.error(
             error instanceof ApiError
                 ? error.first('fields')
-                : 'No se pudo finalizar la firma.',
+                : 'Could not finish signing.',
         );
 
         return;
@@ -200,14 +201,14 @@ async function applySignature(
         toast.error(
             error instanceof ApiError
                 ? error.first('image')
-                : 'No se pudo guardar la firma.',
+                : 'Could not save the signature.',
         );
     }
 }
 </script>
 
 <template>
-    <Head :title="`Firmar ${document.name}`" />
+    <Head :title="`Sign ${document.name}`" />
 
     <div class="flex h-dvh flex-col bg-[#f6f8fb]">
         <header
@@ -231,7 +232,7 @@ async function applySignature(
                     class="truncate text-xs text-muted-foreground"
                     data-test="signing-as"
                 >
-                    Firmando como
+                    Signing as
                     <span class="font-semibold text-foreground">{{
                         signer.name
                     }}</span>
@@ -245,7 +246,7 @@ async function applySignature(
                 class="shrink-0"
                 data-test="exit-button"
             >
-                <Link :href="index().url">Salir</Link>
+                <Link :href="index().url">Exit</Link>
             </Button>
             <Button
                 v-if="!isMobile && canSign"
@@ -257,7 +258,7 @@ async function applySignature(
                 data-test="sign-button"
                 @click="onSignButtonClick"
             >
-                Firmar
+                Sign
             </Button>
             <Button
                 v-if="!isMobile"
@@ -268,7 +269,7 @@ async function applySignature(
                 data-test="finish-button"
                 @click="finish"
             >
-                {{ finishing ? 'Finalizando…' : 'Finalizar firma' }}
+                {{ finishing ? 'Finishing…' : 'Finish signing' }}
             </Button>
         </header>
 
@@ -288,17 +289,17 @@ async function applySignature(
                 class="text-muted-foreground"
                 data-test="signing-hint"
             >
-                Haz clic en cada campo resaltado para firmar.
+                Click each highlighted field to sign.
                 <span class="text-foreground">
-                    Tienes {{ ownFields.length }}
-                    {{ ownFields.length === 1 ? 'campo' : 'campos' }}.
+                    You have {{ ownFields.length }}
+                    {{ ownFields.length === 1 ? 'field' : 'fields' }}.
                 </span>
             </p>
 
             <p
                 class="flex min-w-0 items-center gap-2 text-muted-foreground desk:ml-auto"
             >
-                <span class="shrink-0 font-semibold">Tu enlace de firma</span>
+                <span class="shrink-0 font-semibold">Your signing link</span>
                 <span
                     class="truncate rounded-md bg-[#f6f8fb] px-2 py-1 font-mono select-all"
                     data-test="signer-link"
@@ -309,7 +310,7 @@ async function applySignature(
 
         <main
             ref="scroller"
-            class="min-h-0 flex-1 [scrollbar-gutter:stable] overflow-x-hidden overflow-y-auto p-3 desk:overflow-auto desk:p-8"
+            class="relative min-h-0 flex-1 [scrollbar-gutter:stable] overflow-x-hidden overflow-y-auto p-3 desk:overflow-auto desk:p-8"
             data-test="document-area"
         >
             <PdfPages :src="pdfUrl" :zoom="zoom">
@@ -331,6 +332,19 @@ async function applySignature(
                     </template>
                 </template>
             </PdfPages>
+
+            <div
+                v-if="!isMobile"
+                class="sticky bottom-0 left-0 z-20 mt-3 flex w-fit items-center gap-2 rounded-md bg-[#f6f8fb]/90 px-2 py-1 text-xs text-muted-foreground backdrop-blur-sm"
+            >
+                <Link :href="terms()" class="hover:text-foreground"
+                    >Terms</Link
+                >
+                <span>·</span>
+                <Link :href="privacy()" class="hover:text-foreground"
+                    >Privacy</Link
+                >
+            </div>
         </main>
 
         <div
@@ -350,12 +364,10 @@ async function applySignature(
                     class="text-xs text-muted-foreground"
                     data-test="signing-hint"
                 >
-                    Toca cada campo resaltado para firmar.
+                    Tap each highlighted field to sign.
                     <span class="font-semibold text-foreground"
-                        >{{ signedCount }} de {{ ownFields.length }}
-                        {{
-                            ownFields.length === 1 ? 'firmado' : 'firmados'
-                        }}.</span
+                        >{{ signedCount }} of {{ ownFields.length }}
+                        signed.</span
                     >
                 </p>
                 <Button
@@ -367,7 +379,7 @@ async function applySignature(
                     data-test="sign-button"
                     @click="onSignButtonClick"
                 >
-                    Firmar
+                    Sign
                 </Button>
                 <Button
                     type="button"
@@ -376,7 +388,7 @@ async function applySignature(
                     data-test="finish-button"
                     @click="finish"
                 >
-                    {{ finishing ? 'Finalizando…' : 'Finalizar firma' }}
+                    {{ finishing ? 'Finishing…' : 'Finish signing' }}
                 </Button>
             </template>
         </div>

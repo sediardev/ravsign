@@ -58,7 +58,7 @@ function onResize(dimension: 'width' | 'height', event: Event): void {
         >
             <SelectTrigger
                 class="h-10 min-w-0 flex-1 bg-white"
-                aria-label="Asignado a"
+                aria-label="Assigned to"
                 data-test="field-signer-select"
             >
                 <SelectValue />
@@ -78,7 +78,7 @@ function onResize(dimension: 'width' | 'height', event: Event): void {
             variant="outline"
             size="icon"
             class="size-10 shrink-0 text-destructive hover:text-destructive"
-            aria-label="Eliminar campo"
+            aria-label="Delete field"
             data-test="delete-field"
             @click="emit('remove')"
         >
@@ -92,14 +92,14 @@ function onResize(dimension: 'width' | 'height', event: Event): void {
         data-test="selected-field-panel"
     >
         <h2 class="text-sm font-semibold">
-            Campo seleccionado
+            Selected field
             <span class="font-normal text-muted-foreground"
-                >· Página {{ field.page + 1 }}</span
+                >· Page {{ field.page + 1 }}</span
             >
         </h2>
 
         <div class="flex flex-col gap-1.5">
-            <Label for="field-signer">Asignado a</Label>
+            <Label for="field-signer">Assigned to</Label>
             <Select
                 :model-value="field.signerId"
                 @update:model-value="emit('reassign', $event)"
@@ -125,7 +125,7 @@ function onResize(dimension: 'width' | 'height', event: Event): void {
 
         <div class="grid grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
-                <Label for="field-width">Ancho (pt)</Label>
+                <Label for="field-width">Width (pt)</Label>
                 <Input
                     id="field-width"
                     type="number"
@@ -138,7 +138,7 @@ function onResize(dimension: 'width' | 'height', event: Event): void {
                 />
             </div>
             <div class="flex flex-col gap-1.5">
-                <Label for="field-height">Alto (pt)</Label>
+                <Label for="field-height">Height (pt)</Label>
                 <Input
                     id="field-height"
                     type="number"
@@ -161,10 +161,10 @@ function onResize(dimension: 'width' | 'height', event: Event): void {
             @click="emit('remove')"
         >
             <Trash2 class="size-4" />
-            Eliminar campo
+            Delete field
         </Button>
         <p class="text-xs text-muted-foreground">
-            También puedes pulsar Suprimir.
+            You can also press Delete.
         </p>
     </section>
 </template>

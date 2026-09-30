@@ -109,7 +109,7 @@ const handleStyle = computed(() => ({
             <img
                 v-if="isImage"
                 :src="field.value ?? undefined"
-                :alt="`Firma de ${signer?.name ?? 'firmante'}`"
+                :alt="`Signature by ${signer?.name ?? 'signer'}`"
                 class="pointer-events-none h-full w-full object-contain p-[3px]"
                 draggable="false"
             />
@@ -136,7 +136,7 @@ const handleStyle = computed(() => ({
         <div
             v-if="resizable && selected"
             role="button"
-            aria-label="Cambiar tamaño del campo"
+            aria-label="Resize field"
             class="absolute -right-2 -bottom-2 z-20 flex size-7 cursor-nwse-resize touch-none items-center justify-center"
             data-test="resize-handle"
             @pointerdown.stop="emit('resize-start', $event)"

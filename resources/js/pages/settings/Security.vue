@@ -13,15 +13,15 @@ const props = defineProps<{
 </script>
 
 <template>
-    <Head title="Seguridad" />
+    <Head title="Security" />
 
-    <h1 class="sr-only">Seguridad</h1>
+    <h1 class="sr-only">Security</h1>
 
     <div class="space-y-6">
         <Heading
             variant="small"
-            title="Cambiar contraseña"
-            description="Usa una contraseña larga y aleatoria para mantener tu cuenta segura"
+            title="Change password"
+            description="Use a long, random password to keep your account secure"
         />
 
         <Form
@@ -39,38 +39,38 @@ const props = defineProps<{
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-1.5">
-                <Label for="current_password">Contraseña actual</Label>
+                <Label for="current_password">Current password</Label>
                 <PasswordInput
                     id="current_password"
                     name="current_password"
                     class="block w-full"
                     autocomplete="current-password"
-                    placeholder="Tu contraseña actual"
+                    placeholder="Your current password"
                 />
                 <InputError :message="errors.current_password" />
             </div>
 
             <div class="grid gap-1.5">
-                <Label for="password">Nueva contraseña</Label>
+                <Label for="password">New password</Label>
                 <PasswordInput
                     id="password"
                     name="password"
                     class="block w-full"
                     autocomplete="new-password"
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder="At least 8 characters"
                     :passwordrules="props.passwordRules"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-1.5">
-                <Label for="password_confirmation">Confirmar contraseña</Label>
+                <Label for="password_confirmation">Confirm password</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     class="block w-full"
                     autocomplete="new-password"
-                    placeholder="Repite tu nueva contraseña"
+                    placeholder="Repeat your new password"
                     :passwordrules="props.passwordRules"
                 />
                 <InputError :message="errors.password_confirmation" />
@@ -81,7 +81,7 @@ const props = defineProps<{
                     :disabled="processing"
                     data-test="update-password-button"
                 >
-                    Guardar
+                    Save
                 </Button>
             </div>
         </Form>
