@@ -111,7 +111,7 @@ const documentLines = ['92%', '100%', '84%', '96%'];
                         size="lg"
                         class="flex-auto rounded-xl border-[1.5px] border-input bg-white text-foreground hover:border-foreground hover:bg-white hover:text-foreground"
                     >
-                        <Link :href="login()">Probar el editor</Link>
+                        <Link :href="documents()">Probar el editor</Link>
                     </Button>
                 </div>
             </div>

@@ -23,11 +23,44 @@ export type SignField = {
     value: string | null;
 };
 
+export type SignLink = {
+    signerId: string;
+    /** Absolute URL, '/sign/{token}'. */
+    url: string;
+    token: string;
+    status: 'pendiente' | 'firmado';
+};
+
 export type DocumentItem = {
     id: number;
     name: string;
     status: DocumentStatus;
     date: string;
+    pages: number;
     signers: Signer[];
+    fields: SignField[];
+    /** Empty while the document is a draft. */
+    links: SignLink[];
+};
+
+/** A signer as another signer sees them: no email, no link. */
+export type PublicSigner = Pick<Signer, 'id' | 'name' | 'siglas' | 'color'> & {
+    signed: boolean;
+};
+
+/** The signer using their link on the signing screen. */
+export type SigningSigner = PublicSigner & {
+    email: string;
+    /** Their own absolute link, '/sign/{token}'. */
+    link: string;
+};
+
+/** The document as the signing screen receives it. */
+export type SigningDocument = {
+    id: number;
+    name: string;
+    status: DocumentStatus;
+    pages: number;
+    signers: PublicSigner[];
     fields: SignField[];
 };

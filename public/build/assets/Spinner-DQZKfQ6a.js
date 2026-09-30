@@ -1,0 +1,1 @@
+import{J as e,Wt as t,at as n,ir as r,sr as i,t as a}from"./utils-BGmc_jk8.js";import{p as o}from"./app-XlB8W-1j.js";var s=n({__name:`Spinner`,props:{class:{type:[Boolean,null,String,Object,Array]}},setup(n){let s=n;return(n,c)=>(t(),e(r(o),{role:`status`,"aria-label":`Loading`,class:i(r(a)(`size-4 animate-spin`,s.class))},null,8,[`class`]))}});export{s as t};
