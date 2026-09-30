@@ -6,7 +6,10 @@ use App\Models\Document;
 use App\Models\Signer;
 use App\Models\SignField;
 use App\Models\User;
+use App\Notifications\SignerInviteNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -154,6 +157,45 @@ class DocumentEditorTest extends TestCase
             ->assertNotFound();
 
         $this->assertModelExists($foreign);
+    }
+
+    public function test_resending_the_invite_notifies_a_pending_signer()
+    {
+        Notification::fake();
+
+        $document = Document::factory()->for($this->user)->pendiente()->create();
+        $signer = Signer::factory()->for($document)->withToken()->create();
+
+        $this->actingAs($this->user)
+            ->postJson(route('signers.resend-invite', [$document, $signer]))
+            ->assertNoContent();
+
+        Notification::assertSentTo(
+            new AnonymousNotifiable,
+            SignerInviteNotification::class,
+            fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === $signer->email,
+        );
+    }
+
+    public function test_a_signer_who_already_signed_cannot_be_reinvited()
+    {
+        $document = Document::factory()->for($this->user)->pendiente()->create();
+        $signer = Signer::factory()->for($document)->withToken()->signed()->create();
+
+        $this->actingAs($this->user)
+            ->postJson(route('signers.resend-invite', [$document, $signer]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['signer' => 'Este firmante ya firmó.']);
+    }
+
+    public function test_the_invite_cannot_be_resent_while_the_document_is_a_draft()
+    {
+        $document = $this->draft();
+        $signer = Signer::factory()->for($document)->create();
+
+        $this->actingAs($this->user)
+            ->postJson(route('signers.resend-invite', [$document, $signer]))
+            ->assertForbidden();
     }
 
     public function test_a_field_can_be_created_moved_reassigned_and_removed()

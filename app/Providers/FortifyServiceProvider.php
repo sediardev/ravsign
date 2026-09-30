@@ -68,6 +68,11 @@ class FortifyServiceProvider extends ServiceProvider
         ]));
 
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/ConfirmPassword'));
+
+        Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/VerifyEmail', [
+            'email' => $request->user()?->email,
+            'status' => $request->session()->get('status'),
+        ]));
     }
 
     /**

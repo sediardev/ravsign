@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Copy, Download, ExternalLink } from '@lucide/vue';
-import { computed } from 'vue';
+import { Copy, Download, ExternalLink, Mail } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,7 +11,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { api, ApiError } from '@/lib/api';
 import { download } from '@/routes/documents';
+import { resendInvite } from '@/routes/signers';
 import type { DocumentItem, SignLink, Signer } from '@/types';
 
 const props = defineProps<{
@@ -48,6 +50,34 @@ async function copy(link: SignLink, signer: Signer): Promise<void> {
         toast.success(`Enlace de ${signer.name} copiado`);
     } catch {
         toast.error('No se pudo copiar el enlace.');
+    }
+}
+
+const resending = ref<Set<string>>(new Set());
+
+async function resend(signer: Signer): Promise<void> {
+    const documentId = props.document?.id;
+
+    if (!documentId || resending.value.has(signer.id)) {
+        return;
+    }
+
+    resending.value.add(signer.id);
+
+    try {
+        await api(
+            'POST',
+            resendInvite({ document: documentId, signer: signer.id }).url,
+        );
+        toast.success(`Correo reenviado a ${signer.name}`);
+    } catch (error) {
+        toast.error(
+            error instanceof ApiError
+                ? error.first()
+                : 'No se pudo reenviar el correo.',
+        );
+    } finally {
+        resending.value.delete(signer.id);
     }
 }
 
@@ -158,6 +188,18 @@ function openLink(link: SignLink): void {
                         >
                             <ExternalLink class="size-4" />
                             Abrir enlace
+                        </Button>
+                        <Button
+                            v-if="link.status === 'pendiente'"
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            :disabled="resending.has(signer.id)"
+                            data-test="resend-invite"
+                            @click="resend(signer)"
+                        >
+                            <Mail class="size-4" />
+                            Reenviar correo
                         </Button>
                     </div>
                 </li>

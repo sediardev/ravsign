@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 use setasign\Fpdi\Fpdi;
 use setasign\Fpdi\PdfParser\StreamReader;
@@ -38,13 +39,20 @@ class FullSigningFlowTest extends TestCase
     {
         Storage::fake('local');
 
-        // 1. A new user registers and lands on an empty list.
+        // 1. A new user registers, confirms their email, and lands on an empty list.
         $this->post('/register', [
             'name' => 'Ana Dueña',
             'email' => 'ana@ravsign.test',
             'password' => 'a-long-enough-password-1',
             'password_confirmation' => 'a-long-enough-password-1',
         ])->assertRedirect('/documents');
+
+        $user = User::where('email', 'ana@ravsign.test')->firstOrFail();
+
+        $this->get(URL::temporarySignedRoute('verification.verify', now()->addMinutes(60), [
+            'id' => $user->id,
+            'hash' => sha1($user->email),
+        ]))->assertRedirect();
 
         $this->get(route('documents.index'))
             ->assertInertia(fn (Assert $page) => $page->has('documents', 0));

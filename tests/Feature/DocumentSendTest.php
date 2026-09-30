@@ -7,7 +7,11 @@ use App\Models\Document;
 use App\Models\Signer;
 use App\Models\SignField;
 use App\Models\User;
+use App\Notifications\SignerInviteNotification;
+use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -58,6 +62,44 @@ class DocumentSendTest extends TestCase
         $link = $response->json('data.links.0');
         $this->assertSame(url('/sign/'.$link['token']), $link['url']);
         $this->assertSame('pendiente', $link['status']);
+    }
+
+    public function test_sending_notifies_each_signer_by_email()
+    {
+        Notification::fake();
+
+        $document = $this->readyDraft();
+        $emails = $document->signers()->pluck('email')->all();
+
+        $this->actingAs($this->user)->postJson(route('documents.send', $document))->assertOk();
+
+        foreach ($emails as $email) {
+            Notification::assertSentTo(
+                new AnonymousNotifiable,
+                SignerInviteNotification::class,
+                fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === $email,
+            );
+        }
+    }
+
+    public function test_sending_still_succeeds_even_if_a_signers_email_fails()
+    {
+        $document = $this->readyDraft();
+
+        $this->app->bind(Dispatcher::class, fn () => new class implements Dispatcher
+        {
+            public function send($notifiables, $notification)
+            {
+                throw new \RuntimeException('Mailgun no responde.');
+            }
+
+            public function sendNow($notifiables, $notification, ?array $channels = null) {}
+        });
+
+        $response = $this->actingAs($this->user)->postJson(route('documents.send', $document));
+
+        $response->assertOk()->assertJsonPath('data.status', 'pendiente');
+        $this->assertSame(DocumentStatus::Pendiente, $document->fresh()->status);
     }
 
     public function test_a_document_without_signers_cannot_be_sent()
