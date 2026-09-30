@@ -26,10 +26,18 @@ const signersById = computed(
     () => new Map(props.document.signers.map((s) => [s.id, s])),
 );
 
-const completed = computed(() => props.document.status === 'completado');
+/**
+ * Local copies so finishing can update the view in place instead of
+ * navigating away — the signing link is public and whoever signs it may not
+ * even have an account to be sent to.
+ */
+const documentStatus = ref(props.document.status);
+const signerSigned = ref(props.signer.signed);
+
+const completed = computed(() => documentStatus.value === 'completado');
 /** Only a pending document can still be signed, and only by who has not yet. */
 const canSign = computed(
-    () => props.document.status === 'pendiente' && !props.signer.signed,
+    () => documentStatus.value === 'pendiente' && !signerSigned.value,
 );
 
 const fields = ref<SignField[]>([...props.document.fields]);
@@ -46,7 +54,7 @@ const statusMessage = computed(() => {
         return 'Documento completado por todos los firmantes.';
     }
 
-    return props.signer.signed
+    return signerSigned.value
         ? 'Ya firmaste este documento. Falta que firmen los demás.'
         : null;
 });
@@ -55,8 +63,9 @@ const finishing = ref(false);
 
 /**
  * Finish signing. The owner who is testing their own link goes back to the
- * list, where the links open; a signer without an account stays here and sees
- * that they are done.
+ * list, where the links open; a signer without an account — the common case,
+ * since the signing link is public — stays right here and simply sees that
+ * they are done, with no navigation away from the document.
  */
 async function finish(): Promise<void> {
     if (!canSign.value || finishing.value) {
@@ -71,8 +80,13 @@ async function finish(): Promise<void> {
 
     finishing.value = true;
 
+    let result: { completed: boolean };
+
     try {
-        await api('POST', finishRoute({ token: props.signer.token }).url);
+        result = await api(
+            'POST',
+            finishRoute({ token: props.signer.token }).url,
+        );
     } catch (error) {
         finishing.value = false;
         toast.error(
@@ -86,7 +100,15 @@ async function finish(): Promise<void> {
 
     const signedIn = usePage().props.auth?.user != null;
 
-    router.visit(signedIn ? index().url : usePage().url, {
+    if (!signedIn) {
+        signerSigned.value = true;
+        documentStatus.value = result.completed ? 'completado' : 'pendiente';
+        finishing.value = false;
+
+        return;
+    }
+
+    router.visit(index().url, {
         onFinish: () => {
             finishing.value = false;
         },
@@ -120,6 +142,11 @@ function onFieldClick(field: SignField): void {
     modalOpen.value = true;
 }
 
+/**
+ * Adopting a signature applies it to every one of the signer's own empty
+ * fields of that same type right away — not just the one that was clicked —
+ * so a signer with several signature spots never has to repeat the gesture.
+ */
 function onAdopt(dataUrl: string): void {
     const field = fields.value.find((f) => f.id === modalFieldId.value);
 
@@ -128,7 +155,26 @@ function onAdopt(dataUrl: string): void {
     }
 
     adopted.value[adoptedKey(field)] = dataUrl;
-    void applySignature(field, dataUrl);
+
+    const matching = ownFields.value.filter(
+        (f) => f.value === null && adoptedKey(f) === adoptedKey(field),
+    );
+
+    for (const match of matching) {
+        void applySignature(match, dataUrl);
+    }
+}
+
+/**
+ * The "Firmar" button simulates a click on a signer's next empty field, so
+ * it doesn't need to be obvious that the boxes themselves are clickable.
+ */
+function onSignButtonClick(): void {
+    const next = ownFields.value.find((f) => f.value === null);
+
+    if (next) {
+        onFieldClick(next);
+    }
 }
 
 async function applySignature(
@@ -200,6 +246,18 @@ async function applySignature(
                 data-test="exit-button"
             >
                 <Link :href="index().url">Salir</Link>
+            </Button>
+            <Button
+                v-if="!isMobile && canSign"
+                type="button"
+                variant="secondary"
+                size="sm"
+                class="shrink-0"
+                :disabled="signedCount >= ownFields.length"
+                data-test="sign-button"
+                @click="onSignButtonClick"
+            >
+                Firmar
             </Button>
             <Button
                 v-if="!isMobile"
@@ -300,6 +358,17 @@ async function applySignature(
                         }}.</span
                     >
                 </p>
+                <Button
+                    v-if="signedCount < ownFields.length"
+                    type="button"
+                    variant="secondary"
+                    class="w-full"
+                    :disabled="!canSign"
+                    data-test="sign-button"
+                    @click="onSignButtonClick"
+                >
+                    Firmar
+                </Button>
                 <Button
                     type="button"
                     class="w-full"
